@@ -1,4 +1,3 @@
-
 # INSTALAÇÃO
 
 ## Índice
@@ -90,6 +89,7 @@ Agora você precisa criar uma função Lambda.
   - (opcional) Chave = **home_assistant_room_recognition**: Ative o modo de identificação de área do dispositivo com `True`. **Atenção**, só funciona com IA, se utilizar o Assist padrão, desative essa opção, pois nenhum comando não irá funcionar (isso inclui a nova funcionalidade `Assist fallback` do HA 2024.12 que também não irá funcionar).
   - (opcional) Chave = **home_assistant_dashboard**, Valor = O ID do seu painel. Exemplo: `mushroom`. _(O padrão é 'lovelace') _
   - (opcional) Chave = **home_assistant_kioskmode**, Valor = `True`. Defina esta variável para habilitar o KIOSKMODE. _(Certifique-se de que você tenha este componente instalado, configurado e funcionando em sua instância do Home Assistant)._
+  - (opcional) Chave = **ask_for_further_commands**, Valor = `True` ou `False`. Esta variável determina se a Alexa perguntará por mais comandos após responder. Defina como `True` para ativar este comportamento ou `False` para desativá-lo. O padrão é `False`.
   - (opcional) Chave = **debug**, Valor = `True`. Defina esta variável para registrar as mensagens de depuração e permitir a variável de ambiente `home_assistant_token`.
   - (opcional, _não recomendado_) Chave = **home_assistant_token**, Valor = Seu Home Assistant Long-Lived Access Token. Você conectará sua skill Alexa à sua conta de usuário do Home Assistant nos próximos passos, então não precisará adicioná-lo aqui. No entanto, você pode adicioná-lo aqui para fins de depuração. _(Você deve remover e excluir essa variável de ambiente depois que a depuração terminar)_.
 - Clique no botão **Save** no canto inferior direito.
@@ -202,7 +202,7 @@ Apesar do aviso de isenção de responsabilidade da documentação da Alexa, os 
 ### Ativando o reconhecimento de área
 - **(SÓ FUNCIONA COM IA)** Nesse modo, a skill envia o device id (do dispositivo `echo` que está executando a skill) na chamada da API de conversação do Home Assistant, então com uma instrução de comando para a IA e um rótulo associado no dispositivo, a IA consegue identificador os dispositivo da mesma área onde está localizado sua `Alexa`, para ativar, siga os passos abaixo:
 
-  ***Atenção !***
+  ***Atenção !*** 
   ## Esse modo deixa os comandos mais lentos e e exige configurações mais complexas, além de não funcionar com o modo "Assist fallback" ativado que foi incluido na versão 2024.12 do HA:
   1. Altere a configuração `home_assistant_room_recognition` para `True` e faça um novo `deploy`;
   2. Ative o log de debug da API de conversação adicionando a seguinte configuração no `configuration.yaml` do Home Assistant:

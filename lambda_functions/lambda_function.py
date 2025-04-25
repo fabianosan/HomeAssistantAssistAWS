@@ -57,6 +57,8 @@ account_linking_token = None
 home_assistant_url = os.environ.get('home_assistant_url', "").strip("/")
 # Document Token
 apl_document_token = str(uuid.uuid4())
+# Add a global variable to control asking for further commands
+ask_for_further_commands = bool(os.environ.get('ask_for_further_commands', False))
 
 class LaunchRequestHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
@@ -141,7 +143,10 @@ class GptQueryIntentHandler(AbstractRequestHandler):
         future = loop.run_in_executor(executor, process_conversation, query + device_id)
         response = loop.run_until_complete(future)
 
-        return handler_input.response_builder.speak(response).ask(globals().get("alexa_speak_question")).response
+        if ask_for_further_commands:
+            return handler_input.response_builder.speak(response).ask(globals().get("alexa_speak_question")).response
+        else:
+            return handler_input.response_builder.speak(response).set_should_end_session(True).response
 
 # Trata palavras chaves para executar comandos específicos
 def keywords_exec(query, handler_input):
@@ -168,7 +173,7 @@ def process_conversation(query):
     # Obtem as variáveis de ambiente configuradas pelo usuário
     if not home_assistant_url:
         logger.error("Please set 'home_assistant_url' AWS Lambda Functions environment variable.")
-        return globals().get("alexa_speak_error")    
+        return globals().get("alexa_speak_error")
     
     home_assistant_agent_id = os.environ.get("home_assistant_agent_id", None)
     home_assistant_language = os.environ.get("home_assistant_language", None)

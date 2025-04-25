@@ -1,4 +1,3 @@
-
 # INSTALLATION
 
 ## Table of Contents
@@ -90,6 +89,7 @@ Next, you need to create a Lambda function.
   - (optional) Key = **home_assistant_room_recognition**: Enable the device area recognition mode with `True`. **Attention**, it only works with AI. If using the default Assist, disable this option, as no commands will work (this includes the new `Assist fallback` feature introduced in HA 2024.12 that will no longger work too).
   - (optional) Key = **home_assistant_dashboard**, Value = Your dashboard path name. Example: `mushroom`. _(The default is `lovelace`)_
   - (optional) Key = **home_assistant_kioskmode**, Value = `True`. Set this variable to enable KIOSKMODE. _(Make sure you have this component installed, up, and running in your Home Assistant instance)._
+  - (optional) Key = **ask_for_further_commands**, Value = `True` or `False`. This variable determines whether Alexa will ask for further commands after responding. Set it to `True` to enable this behavior or `False` to disable it. The default is `False`.
   - (optional) Key = **debug**, Value = `True`. Set this variable to log the debug messages and allow the `home_assistant_token` environment variable.
   - (optional, _not recommended_) Key = **home_assistant_token**, Value = Your Home Assistant Long-Lived Access Token. You will connect your Alexa Skill with your Home Assistant user account in the later steps, meaning you don’t need to add it here. However, you can add it here for debugging purposes. _(You should remove and delete this environment variable after debugging is finished)_.
 - Click the **Save** button in the bottom right-hand corner.
