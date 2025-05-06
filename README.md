@@ -59,6 +59,7 @@ The skill has support for the following languages:
 - Portuguese (Brazil)
 - Portuguese (Portugal)
 - Russian (Russia)
+- Slovak (Slovakia)
 
 Note: If your language is not supported, please open an `issue` attaching your own version of the file [en-US.lang](lambda_functions/locale/en-US.lang).
 
@@ -126,3 +127,4 @@ A skill tem suporte para os seguintes idiomas:
 - Português (Brasil)
 - Português (Portugal)
 - Russo (Rússia)
+- Eslovaco (Eslováquia)

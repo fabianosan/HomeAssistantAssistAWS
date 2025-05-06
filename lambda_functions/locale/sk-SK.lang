@@ -1,0 +1,15 @@
+echo_screen_welcome_text=Vitajte v Home Assistante!
+echo_screen_click_text=Kliknite na tlačidlo nižšie pre otvorenie vášho panela
+echo_screen_button_text=Otvoriť Home Assistant
+
+alexa_speak_welcome_message=Vitajte v hlasovom asistente Home Assistant! Ako vám môžem pomôcť?
+alexa_speak_next_message=Opäť vás vítam, ako vám môžem teraz pomôcť?
+alexa_speak_question=Ešte niečo?
+alexa_speak_help=Ako vám môžem pomôcť?
+alexa_speak_exit=Majte sa!;Zbohom;Ak ma budete potrebovať, som tu;Dobre, odchádzam;Čauko;Všetko je v poriadku;Ďakujem, majte sa.;Odchádzam, ďakujem.
+alexa_speak_error=Prepáčte, požiadavku sa nepodarilo spracovať.
+alexa_speak_timeout=Home Assistant odpovedal príliš dlho. Zjednodušte príkaz a skúste to znova!
+alexa_speak_open_dashboard=Otváram Home Assistant
+
+keywords_to_open_dashboard=otvor panel; otvor home assistant
+keywords_to_close_skill=nie;nič;to je všetko;ďakujem
