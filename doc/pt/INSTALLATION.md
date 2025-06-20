@@ -11,7 +11,8 @@
 8. [Vinculação de Conta](#vinculação-de-conta)
 9. [Ativando o reconhecimento de área](#ativando-o-reconhecimento-de-área)
 10. [Habilitar a Skill no App Alexa](#habilitar-a-skill-no-app-alexa)
-11. [Localização da Alexa](#localização-da-alexa)
+11. [Ativando iniciador de conversa com prompt do Home Assistant](#ativando-iniciador-de-conversa-com-prompt-do-home-assistant)
+12. [Localização da Alexa](#localização-da-alexa)
 
 ---
 
@@ -89,6 +90,8 @@ Agora você precisa criar uma função Lambda.
   - (opcional) Chave = **home_assistant_room_recognition**: Ative o modo de identificação de área do dispositivo com `True`. **Atenção**, só funciona com IA, se utilizar o Assist padrão, desative essa opção, pois nenhum comando não irá funcionar (isso inclui a nova funcionalidade `Assist fallback` do HA 2024.12 que também não irá funcionar).
   - (opcional) Chave = **home_assistant_dashboard**, Valor = O ID do seu painel. Exemplo: `mushroom`. _(O padrão é 'lovelace') _
   - (opcional) Chave = **home_assistant_kioskmode**, Valor = `True`. Defina esta variável para habilitar o KIOSKMODE. _(Certifique-se de que você tenha este componente instalado, configurado e funcionando em sua instância do Home Assistant)._
+  - (opcional) Chave = **ask_for_further_commands**, Valor = `True`. Esta variável determina se a Alexa perguntará por mais comandos após responder. Defina como `True` para ativar este comportamento ou `False` para desativá-lo. O padrão é `False`.
+  - (opcional) Chave = **assist_input_entity**: Valor = `input_text.assistant_input`. Ative a funcionalidade de iniciar uma conversa com prompt do Home Assistant. **Atenção**, essa funcionalidade requer [configurações extras no Home Assistant](#ativando-iniciador-de-conversa-com-prompt-do-home-assistant).
   - (opcional) Chave = **ask_for_further_commands**, Valor = `True` ou `False`. Esta variável determina se a Alexa perguntará por mais comandos após responder. Defina como `True` para ativar este comportamento ou `False` para desativá-lo. O padrão é `False`.
   - (opcional) Chave = **debug**, Valor = `True`. Defina esta variável para registrar as mensagens de depuração e permitir a variável de ambiente `home_assistant_token`.
   - (opcional, _não recomendado_) Chave = **home_assistant_token**, Valor = Seu Home Assistant Long-Lived Access Token. Você conectará sua skill Alexa à sua conta de usuário do Home Assistant nos próximos passos, então não precisará adicioná-lo aqui. No entanto, você pode adicioná-lo aqui para fins de depuração. _(Você deve remover e excluir essa variável de ambiente depois que a depuração terminar)_.
@@ -234,6 +237,98 @@ Apesar do aviso de isenção de responsabilidade da documentação da Alexa, os 
   - Uma nova janela será aberta para direcioná-lo à tela de login do seu Home Assistant.
   - Depois de fazer login com sucesso, você será redirecionado de volta ao app Alexa.
   - Agora, você pode pedir à Alexa no seu dispositivo Echo ou no App Alexa para abrir a skill, como **Alexa, [seu Nome de Invocação]**.
+
+### Ativando iniciador de conversa com prompt do Home Assistant
+
+#### Esta configuração adiciona o recurso de prompter para permitir conversas da Alexa iniciadas a partir do Home Assistant
+
+1. Ative a configuração na skill da Alexa:
+   - Adicione a seguinte linha ao seu arquivo `config.cfg`:
+
+     ```
+     assist_input_entity = input_text.assistant_input
+     ```
+
+2. Crie um Auxiliar de Texto no Home Assistant:
+
+    1. Abra o Home Assistant.
+    2. Vá em: **Configurações → Dispositivos e Serviços → Auxiliares**
+    3. Clique em **Criar Auxiliar** → Escolha **Texto**.
+    4. Defina as seguintes opções:
+        - **Nome:** `assistant_input`
+        - **Número máximo de caracteres:** `255` (este é o limite rígido)
+    5. Clique em **Criar**.
+
+    > ⚠️ Nota: 255 caracteres é uma limitação rígida para o tamanho do prompt. Ainda não há uma solução confiável, exceto incorporar outras entradas de texto no prompt.
+
+3. Crie um Script no Home Assistant:
+
+    1. Vá até o [Console do Desenvolvedor Alexa](https://developer.amazon.com/alexa/console/ask).
+    2. Na página inicial da sua skill, clique em **Copiar ID da Skill**.
+    3. No Home Assistant, vá para **Configurações → Automatizações e Cenas → Scripts**.
+    4. Clique em **Adicionar Script** e dê um nome como `Prompt Alexa Device`.
+    5. Clique no menu de três pontos (⋮) e mude para o **modo YAML**.
+    6. Cole o seguinte YAML no editor.  
+       Substitua os espaços reservados:
+         - `*your Skill ID*` → pelo ID real da sua skill Alexa  
+         - `*the alexa you want to target*` → pelo ID da entidade `media_player` do seu dispositivo Alexa
+
+         ```
+         sequence:
+           - action: input_text.set_value
+             metadata: {}
+             data:
+               value: "{{prompt}}"
+             target:
+               entity_id: input_text.assistant_input
+           - action: media_player.play_media
+             data:
+               media_content_id: *your Skill ID*
+               media_content_type: skill
+             target:
+               entity_id: *the alexa you want to target*
+           - delay:
+               hours: 0
+               minutes: 0
+               seconds: 10
+               milliseconds: 0
+           - action: input_text.set_value
+             metadata: {}
+             data:
+               value: none
+             target:
+               entity_id: input_text.assistant_input 
+         alias: prompt on Alexa device
+         description: ""
+         fields:
+           prompt:
+             selector:
+               text: null
+             name: prompt
+             description: >-
+               O prompt a ser enviado para a skill, usado como a primeira mensagem para iniciar uma conversa.
+             required: true
+         ```
+
+    7. Clique em **Salvar**.
+
+4. Chame o Script a partir de uma Automação
+
+    Agora que o script está configurado, você pode acioná-lo a partir de uma automação. Isso irá:
+      - Enviar um prompt para sua skill da Alexa;
+      - Iniciar uma conversa falada com a resposta do assistente.
+      ### Exemplo de Ação de Automação
+
+      ```
+      action: script.prompt_alexa_device
+      metadata: {}
+      data:
+        prompt: >-
+          Estou cozinhando na cozinha, você pode tocar alguma música,
+          sugerir um gênero com base na hora do dia e no dia da semana?
+      ```
+
+      > ⚠️ **Importante:** Os prompts devem ter **menos de 255 caracteres**, ou a chamada não funcionará.
 
 ## Localização da Alexa
 A localização deve corresponder ao local e idioma usados em seus dispositivos Amazon Echo.

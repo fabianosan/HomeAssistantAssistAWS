@@ -30,7 +30,8 @@ This is an Alexa skill model that integrates Home Assistant Assist or your prefe
 - Open Home Assistant dashboard:
     - Say 'open home assistant' or 'open dashboard' to open your prefered dashboard in Home Assistant.
     - Or click on the sceen to open.
-- Other:
+- Others:
+    - Start a conversation with prompt from Home Assistant (thanks to [t07que](https://github.com/t07que))
     - Multi-language support _(see [Supported languages](#supported-languages))_
 
 If you have a feature idea, open a issue to suggest your idea for implementation.
@@ -99,6 +100,7 @@ Este é um modelo de skill Alexa que integra o Home Assistant Assist ou sua IA G
     - Diga 'abrir home assistant' ou 'abrir painel' para abrir seu painel preferido no Home Assistant.
     - Ou clique na tela para abrir.
 - Outros:
+    - Iniciar uma conversa com a Alexa de um prompt do Home Assistant (agradecimento ao [t07que](https://github.com/t07que))
     - Suporte a vários idiomas (veja [Idiomas suportados](#idiomas-suportados))
 
 Se você tiver uma ideia de recurso, abra um issue para sugerir sua ideia para implementação.

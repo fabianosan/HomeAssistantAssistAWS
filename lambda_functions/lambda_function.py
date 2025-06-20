@@ -16,12 +16,10 @@ from ask_sdk_model.interfaces.alexa.presentation.apl import RenderDocumentDirect
 from datetime import datetime, timezone, timedelta
 from concurrent.futures import ThreadPoolExecutor
 
-# Carrega as configurações e localizações
+# Load configurations and localization
 def load_config(file_name):
-    
     if str(file_name).endswith(".lang") and not os.path.exists(file_name):
         file_name = "locale/en-US.lang"
-    
     try:
         with open(file_name, encoding='utf-8') as f:
             for line in f:
@@ -29,34 +27,52 @@ def load_config(file_name):
                 if not line or '=' not in line:
                     continue
                 name, value = line.split('=', 1)
-                # Armazena diretamente nas variáveis globais
+                # Store in global vars
                 globals()[name] = value
     except Exception as e:
         logger.error(f"Error loading file: {str(e)}")
 
-# Carrega o idioma padrão, que será alterado quando obter o idioma escolhido pelo usuário quando a skill for iniciada
+# Initial config load
 load_config("locale/en-US.lang")
 
-# Configuração de log
+# Log configuration
 debug = bool(os.environ.get('debug', False))
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG if debug else logging.INFO)
 
-# Número de threads do pool
+# Thread pool max workers
 executor = ThreadPoolExecutor(max_workers=5)
 
-# Identificador da conversa
+# Globals for conversation
 conversation_id = None
-# Última sessão da skill
 last_interaction_date = None
-# APL Supported
 is_apl_supported = False
-# Token de autenticação do Home Assistant
 account_linking_token = None
-# URL base do Home Assistant
 home_assistant_url = os.environ.get('home_assistant_url', "").strip("/")
-# Document Token
 apl_document_token = str(uuid.uuid4())
+ask_for_further_commands = bool(os.environ.get('ask_for_further_commands', False))
+
+# Helper: fetch text input via webhook
+def fetch_prompt_from_ha():
+    """
+    Reads the state of your input_text helper directly via REST.
+    """
+    try:
+        entity = globals().get("assist_input_entity", "input_text.assistant_input")
+        url = f"{globals().get('home_assistant_url')}/api/states/{entity}"
+        headers = {
+            "Authorization": f"Bearer {globals().get('home_assistant_token')}",
+            "Content-Type": "application/json"
+        }
+        resp = requests.get(url, headers=headers, timeout=5)
+        if resp.status_code == 200:
+            return resp.json().get("state", "").strip()
+        else:
+            logger.error(f"HA state fetch failed: {resp.status_code} {resp.text}")
+    except Exception as e:
+        logger.error(f"Error fetching prompt from HA state: {e}")
+    return ""
+
 # Add a global variable to control asking for further commands
 ask_for_further_commands = bool(os.environ.get('ask_for_further_commands', False))
 
@@ -67,50 +83,53 @@ class LaunchRequestHandler(AbstractRequestHandler):
     def handle(self, handler_input):
         global conversation_id, last_interaction_date, is_apl_supported, account_linking_token
         
-        # Carrega o idioma do usuário
+        # Load locale per user
         locale = handler_input.request_envelope.request.locale
         load_config(f"locale/{locale}.lang")
 
         # save user_locale var for regional differences in number handling like 2.4°C / 2,4°C
         global user_locale
         user_locale = locale.split("-")[1]  # "de-DE" -> "DE" split to respect lang differencies (not country specific)
-   
-        #conversation_id = None # 'Descomente' se quiser que uma nova sessão de diálogo com a IA sempre que iniciar
-        
+
+        # Obtaining Account Linking token
         account_linking_token = handler_input.request_envelope.context.system.user.access_token
-        # Obter o token de Account Linking
         if account_linking_token is None and debug:
             account_linking_token = os.environ.get('home_assistant_token') # DEBUG Purpose
 
-        # Verificar se o token foi obtido com sucesso
+        # Verifying if token was successfully obtained
         if not account_linking_token:
             logger.error("Unable to get token from Alexa Account Linking or AWS Functions environment variable.")
             speak_output = globals().get("alexa_speak_error")
             return handler_input.response_builder.speak(speak_output).response
 
-        # Verifica se o dispositivo tem tela (APL support), se sim, carrega a interface
+        # Check for a pre-set prompt from HA
+        prompt = fetch_prompt_from_ha()
+        # Only treat valid prompts that are not the literal "none"
+        if prompt and prompt.lower() != "none":
+            # Process this prompt as user input and keep session open for follow-up
+            response = process_conversation(prompt)
+            return handler_input.response_builder.speak(response).ask(globals().get("alexa_speak_question")).response
+
+        # No prompt and Checks if the device has a screen (APL support), if so, loads the interface
         device = handler_input.request_envelope.context.system.device
         is_apl_supported = device.supported_interfaces.alexa_presentation_apl is not None
         logger.debug("Device: " + repr(device))
         
-        # Renderiza o documento APL com o botão para abrir o HA (se o dispositivo tiver tela)
+        # Renders the APL document with the button to open HA (if the device has a screen)
         if is_apl_supported:
             handler_input.response_builder.add_directive(
-                RenderDocumentDirective(
-                    token=apl_document_token,
-                    document=load_template("apl_openha.json")
-                )
+                RenderDocumentDirective(token=apl_document_token, document=load_template("apl_openha.json"))
             )
             
-        # Define o último acesso e define qual frase de boas vindas responder
+        # Sets the last access and defines which welcome phrase to respond to
         now = datetime.now(timezone(timedelta(hours=-3)))
         current_date = now.strftime('%Y-%m-%d')
         speak_output = globals().get("alexa_speak_next_message")
         if last_interaction_date != current_date:
-            # Primeira execução do dia
+            # First run of the day
             speak_output = globals().get("alexa_speak_welcome_message")
-            last_interaction_date = current_date        
-
+            last_interaction_date = current_date
+            
         return handler_input.response_builder.speak(speak_output).ask(speak_output).response
 
 class GptQueryIntentHandler(AbstractRequestHandler):
@@ -118,11 +137,11 @@ class GptQueryIntentHandler(AbstractRequestHandler):
         return ask_utils.is_intent_name("GptQueryIntent")(handler_input)
 
     def handle(self, handler_input):
-        # Captura a consulta do usuário
+        # User query
         query = handler_input.request_envelope.request.intent.slots["query"].value
         logger.info(f"Query received from Alexa: {query}")
         
-        # Trata comandos/palavras chaves específicas
+        # Handles specific commands/keywords
         response = keywords_exec(query, handler_input)
         if response:
             return response
@@ -130,47 +149,48 @@ class GptQueryIntentHandler(AbstractRequestHandler):
         device_id = ""
         home_assistant_room_recognition = bool(os.environ.get("home_assistant_room_recognition", False))
         if home_assistant_room_recognition:
-            # Obter o deviceId do dispositivo que executou a skill
+            # Get the deviceId of the device that executed the skill
             device_id = ". device_id: " + handler_input.request_envelope.context.system.device.device_id
         
-        # Resposta inicial informando que a solicitação está sendo processada
+        # Initial response stating that the request is being processed
         initial_response = globals().get("alexa_speak_processing")
         handler_input.response_builder.speak(initial_response).set_should_end_session(False)
 
-        # Executa a parte assíncrona com asyncio
+        # Execute the asynchronous part with asyncio
         loop = asyncio.new_event_loop()  # Cria um novo event loop
         asyncio.set_event_loop(loop)  # Define o loop de eventos para a thread atual
         future = loop.run_in_executor(executor, process_conversation, query + device_id)
         response = loop.run_until_complete(future)
 
+		logger.debug(f"Ask for further commands enabled: {ask_for_further_commands}")
         if ask_for_further_commands:
             return handler_input.response_builder.speak(response).ask(globals().get("alexa_speak_question")).response
         else:
             return handler_input.response_builder.speak(response).set_should_end_session(True).response
 
-# Trata palavras chaves para executar comandos específicos
+# Handles keywords to execute specific commands
 def keywords_exec(query, handler_input):
-    # Se o usuário der um comando para 'abrir dashboard' ou 'abrir home assistant', abre o dashboard e interrompe a skill
+    # If the user gives a command to 'open dashboard' or 'open home assistant', it opens the dashboard and stops the skill
     keywords_top_open_dash = globals().get("keywords_to_open_dashboard").split(";")
     if any(ko.strip().lower() in query.lower() for ko in keywords_top_open_dash):
         logger.info("Opening Home Assistant dashboard")
         open_page(handler_input)
         return handler_input.response_builder.speak(globals().get("alexa_speak_open_dashboard")).response
     
-    # Se o usuário der um comando de agradecimento o upara sair, interrompe a skill
+    # If the user gives a thank you command to exit, it interrupts the skill.
     keywords_close_skill = globals().get("keywords_to_close_skill").split(";")
     if any(kc.strip().lower() in query.lower() for kc in keywords_close_skill):
         logger.info("Closing skill from keyword command")
         return CancelOrStopIntentHandler().handle(handler_input)
     
-    # Se não for uma palavra-chave, continua o fluxo normalmente
+    # If it is not a keyword, the flow continues normally.
     return None
 
-# Chama a API do Home Assistant e trata a resposta
+# Calls the Home Assistant API and handles the response
 def process_conversation(query):
     global conversation_id
     
-    # Obtem as variáveis de ambiente configuradas pelo usuário
+    # Gets user-configured environment variables
     if not home_assistant_url:
         logger.error("Please set 'home_assistant_url' AWS Lambda Functions environment variable.")
         return globals().get("alexa_speak_error")

@@ -11,7 +11,8 @@
 8. [Account Linking](#account-linking)
 9. [Enabling room recognition](#enabling-room-recognition)
 10. [Enabling skill on Alexa App](#enabling-skill-on-alexa-app)
-11. [Alexa Locale](#alexa-locale)
+11. [Enabling conversation starter with prompt from Home Assistant](#enabling-conversation-starter-with-prompt-from-home-assistant)
+12. [Alexa Locale](#alexa-locale)
 
 ---
 
@@ -89,6 +90,8 @@ Next, you need to create a Lambda function.
   - (optional) Key = **home_assistant_room_recognition**: Enable the device area recognition mode with `True`. **Attention**, it only works with AI. If using the default Assist, disable this option, as no commands will work (this includes the new `Assist fallback` feature introduced in HA 2024.12 that will no longger work too).
   - (optional) Key = **home_assistant_dashboard**, Value = Your dashboard path name. Example: `mushroom`. _(The default is `lovelace`)_
   - (optional) Key = **home_assistant_kioskmode**, Value = `True`. Set this variable to enable KIOSKMODE. _(Make sure you have this component installed, up, and running in your Home Assistant instance)._
+  - (optional) Key = **ask_for_further_commands**, Value = `True`. This variable determines whether Alexa will ask for further commands after responding. Set it to `True` to enable this behavior or `False` to disable it. The default is `False`.
+  - (optional) Key = **assist_input_entity**: Value = `input_text.assistant_input`. Enable conversation starter with prompt from Home Assistant. **Attention**, this feature require [extra setup in Home Assistant](#enabling-conversation-starter-with-prompt-from-home-assistant).
   - (optional) Key = **ask_for_further_commands**, Value = `True` or `False`. This variable determines whether Alexa will ask for further commands after responding. Set it to `True` to enable this behavior or `False` to disable it. The default is `False`.
   - (optional) Key = **debug**, Value = `True`. Set this variable to log the debug messages and allow the `home_assistant_token` environment variable.
   - (optional, _not recommended_) Key = **home_assistant_token**, Value = Your Home Assistant Long-Lived Access Token. You will connect your Alexa Skill with your Home Assistant user account in the later steps, meaning you don’t need to add it here. However, you can add it here for debugging purposes. _(You should remove and delete this environment variable after debugging is finished)_.
@@ -234,6 +237,98 @@ Despite the Alexa documentation’s disclaimer, however, `Let’s Encrypt` certi
   - A new window will open to direct you to your Home Assistant’s login screen.
   - After you successfully log in, you will be redirected back to the Alexa app.
   - Now, you can ask Alexa from your Echo device or the Alexa App to open the skill like **Alexa, [your Invocation Name]**.
+
+### Enabling conversation starter with prompt from Home Assistant
+
+  #### This setup add prompter feature to enable Alexa conversations started from Home Assistant
+
+  1. Enable the configuration in Alexa skill:
+    - Add the following line to your `config.cfg` file:
+
+      ```
+      assist_input_entity = input_text.assistant_input
+      ```
+
+  2. Create a Text Helper in Home Assistant:
+  
+      1. Open Home Assistant.
+      2. Go to: **Settings → Devices & Services → Helpers**
+      3. Click **Create Helper** → Choose **Text**.
+      4. Set the following options:
+          - **Name:** `assistant_input`
+          - **Maximum number of characters:** `255` (this is the hard limit)
+      5. Click **Create**.
+
+      > ⚠️ Note: 255 characters is a hard limitation for prompt size. There's no reliable workaround yet, except embedding other text inputs into the prompt.
+
+  3. Create a Script in Home Assistant:
+
+      1. Go to the [Alexa Developer Console](https://developer.amazon.com/alexa/console/ask).
+      2. On your skill’s home page, click **Copy Skill ID**.
+      3. In Home Assistant, navigate to **Settings → Automations & Scenes → Scripts**.
+      4. Click **Add Script** and enter a name like `Prompt Alexa Device`.
+      5. Click the three-dot menu (⋮) and switch to **YAML mode**.
+      6. Paste the following YAML into the editor.  
+        Replace the placeholders:
+          - `*your Skill ID*` → your actual Alexa skill ID  
+          - `*the alexa you want to target*` → the `media_player` entity ID of your Alexa device
+
+          ```
+          sequence:
+            - action: input_text.set_value
+              metadata: {}
+              data:
+                value: "{{prompt}}"
+              target:
+                entity_id: input_text.assistant_input
+            - action: media_player.play_media
+              data:
+                media_content_id: *your Skill ID*
+                media_content_type: skill
+              target:
+                entity_id: *the alexa you want to target*
+            - delay:
+                hours: 0
+                minutes: 0
+                seconds: 10
+                milliseconds: 0
+            - action: input_text.set_value
+              metadata: {}
+              data:
+                value: none
+              target:
+                entity_id: input_text.assistant_input 
+          alias: prompt on Alexa device
+          description: ""
+          fields:
+            prompt:
+              selector:
+                text: null
+              name: prompt
+              description: >-
+                The prompt to pass to the skill, used as the first message to start a conversation.
+              required: true
+          ```
+
+      7. Click **Save**.
+
+  4. Call the Script from an Automation
+
+      Now that the script is set up, you can trigger it from an automation. This will:
+        - Pass a prompt to your Alexa skill;
+        - Begin a spoken conversation using the assistant's response.
+        ### Example Automation Action
+
+        ```
+        action: script.prompt_alexa_device
+        metadata: {}
+        data:
+          prompt: >-
+            I am cooking in the kitchen, can you offer to play some music,
+            suggest a genre based on the time of day and day of the week.
+        ```
+
+        > ⚠️ **Important:** Prompts must be **fewer than 255 characters**, or the call will fail.
 
 ## Alexa Locale
 The locale should match the location and language used for your Amazon Echo devices.
