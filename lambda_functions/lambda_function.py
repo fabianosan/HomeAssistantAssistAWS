@@ -73,9 +73,6 @@ def fetch_prompt_from_ha():
         logger.error(f"Error fetching prompt from HA state: {e}")
     return ""
 
-# Add a global variable to control asking for further commands
-ask_for_further_commands = bool(os.environ.get('ask_for_further_commands', False))
-
 class LaunchRequestHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         return ask_utils.is_request_type("LaunchRequest")(handler_input)
@@ -162,7 +159,7 @@ class GptQueryIntentHandler(AbstractRequestHandler):
         future = loop.run_in_executor(executor, process_conversation, query + device_id)
         response = loop.run_until_complete(future)
 
-		logger.debug(f"Ask for further commands enabled: {ask_for_further_commands}")
+        logger.debug(f"Ask for further commands enabled: {ask_for_further_commands}")
         if ask_for_further_commands:
             return handler_input.response_builder.speak(response).ask(globals().get("alexa_speak_question")).response
         else:
