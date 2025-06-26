@@ -243,7 +243,7 @@ Despite the Alexa documentation’s disclaimer, however, `Let’s Encrypt` certi
   #### This setup add prompter feature to enable Alexa conversations started from Home Assistant
 
   1. Enable the configuration in Alexa skill:
-    - Add the following line to your `config.cfg` file:
+    - Verify that the `assist_input_entity` environment variable is created and configured as below in AWS Lambda:
 
       ```
       assist_input_entity = input_text.assistant_input

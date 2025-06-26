@@ -243,7 +243,7 @@ Apesar do aviso de isenção de responsabilidade da documentação da Alexa, os 
 #### Esta configuração adiciona o recurso de prompter para permitir conversas da Alexa iniciadas a partir do Home Assistant
 
 1. Ative a configuração na skill da Alexa:
-   - Adicione a seguinte linha ao seu arquivo `config.cfg`:
+   - Verifique se a variável de ambiente `assist_input_entity` foi criada e configurada conforme abaixo no AWS Lambda:
 
      ```
      assist_input_entity = input_text.assistant_input
@@ -256,7 +256,7 @@ Apesar do aviso de isenção de responsabilidade da documentação da Alexa, os 
     3. Clique em **Criar Auxiliar** → Escolha **Texto**.
     4. Defina as seguintes opções:
         - **Nome:** `assistant_input`
-        - **Número máximo de caracteres:** `255` (este é o limite rígido)
+        - **Número máximo de caracteres:** `255` (este é o limite de tamanho)
     5. Clique em **Criar**.
 
     > ⚠️ Nota: 255 caracteres é uma limitação rígida para o tamanho do prompt. Ainda não há uma solução confiável, exceto incorporar outras entradas de texto no prompt.
