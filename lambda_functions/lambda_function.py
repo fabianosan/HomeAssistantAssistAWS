@@ -50,7 +50,7 @@ is_apl_supported = False
 account_linking_token = None
 home_assistant_url = os.environ.get('home_assistant_url', "").strip("/")
 apl_document_token = str(uuid.uuid4())
-assist_input_entity = os.environ.get('assist_input_entity', "")
+assist_input_entity = os.environ.get('assist_input_entity', "input_text.assistant_input")
 ask_for_further_commands = bool(os.environ.get('ask_for_further_commands', False))
 
 # Helper: fetch text input via webhook
@@ -72,6 +72,7 @@ def fetch_prompt_from_ha():
     except Exception as e:
         logger.error(f"Error fetching prompt from HA state: {e}")
     return ""
+
 
 class LaunchRequestHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
@@ -100,13 +101,12 @@ class LaunchRequestHandler(AbstractRequestHandler):
             return handler_input.response_builder.speak(speak_output).response
 
         # Check for a pre-set prompt from HA
-        if assist_input_entity != "":
-            prompt = fetch_prompt_from_ha()
-            # Only treat valid prompts that are not the literal "none"
-            if prompt and prompt.lower() != "none":
-                # Process this prompt as user input and keep session open for follow-up
-                response = process_conversation(prompt)
-                return handler_input.response_builder.speak(response).ask(globals().get("alexa_speak_question")).response
+        prompt = fetch_prompt_from_ha()
+        # Only treat valid prompts that are not the literal "none"
+        if prompt and prompt.lower() != "none":
+            # Process this prompt as user input and keep session open for follow-up
+            response = process_conversation(prompt)
+            return handler_input.response_builder.speak(response).ask(globals().get("alexa_speak_question")).response
 
         # No prompt and Checks if the device has a screen (APL support), if so, loads the interface
         device = handler_input.request_envelope.context.system.device
