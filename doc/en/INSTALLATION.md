@@ -324,8 +324,14 @@ Despite the Alexa documentation’s disclaimer, however, `Let’s Encrypt` certi
         metadata: {}
         data:
           prompt: >-
-            I am cooking in the kitchen, can you offer to play some music,
-            suggest a genre based on the time of day and day of the week.
+            Suggest that I remember to lock all doors and windows in the house before leaving
+        ```
+
+        Other sample prompts:
+
+        ```
+        - What's the weather forecast?
+        - Ask if I'd like to turn off the lights
         ```
 
         > ⚠️ **Important:** Prompts must be **fewer than 255 characters**, or the call will fail.

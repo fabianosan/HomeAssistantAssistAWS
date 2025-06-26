@@ -324,8 +324,14 @@ Apesar do aviso de isenção de responsabilidade da documentação da Alexa, os 
       metadata: {}
       data:
         prompt: >-
-          Estou cozinhando na cozinha, você pode tocar alguma música,
-          sugerir um gênero com base na hora do dia e no dia da semana?
+          Sugira que eu lembre de trancar todas as portas e janelas da casa antes de sair
+      ```
+
+      Outros exemplos de prompt:
+
+      ```
+      - Qual e a previsão do tempo?
+      - Pergunte se eu gostaria de desligar as luzes
       ```
 
       > ⚠️ **Importante:** Os prompts devem ter **menos de 255 caracteres**, ou a chamada não funcionará.
