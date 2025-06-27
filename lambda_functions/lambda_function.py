@@ -168,21 +168,32 @@ class GptQueryIntentHandler(AbstractRequestHandler):
 
 # Handles keywords to execute specific commands
 def keywords_exec(query, handler_input):
-    # If the user gives a command to 'open dashboard' or 'open home assistant', it opens the dashboard and stops the skill
+    # Check if the previous response was one of those that allow closing with a keyword
+    last_speak_output = handler_input.attributes_manager.session_attributes.get("last_speak_output", "")
+
+    # Commands to open the dashboard
     keywords_top_open_dash = globals().get("keywords_to_open_dashboard").split(";")
     if any(ko.strip().lower() in query.lower() for ko in keywords_top_open_dash):
         logger.info("Opening Home Assistant dashboard")
         open_page(handler_input)
         return handler_input.response_builder.speak(globals().get("alexa_speak_open_dashboard")).response
-    
-    # If the user gives a thank you command to exit, it interrupts the skill.
+
+    # Commands to close the skill — are only valid if the last response was one of the allowed ones
     keywords_close_skill = globals().get("keywords_to_close_skill").split(";")
-    if any(kc.strip().lower() in query.lower() for kc in keywords_close_skill):
-        logger.info("Closing skill from keyword command")
+    allowed_closing_contexts = [
+        globals().get("alexa_speak_welcome_message"),
+        globals().get("alexa_speak_next_message"),
+        globals().get("alexa_speak_question"),
+        globals().get("alexa_speak_help"),
+    ]
+
+    if (any(kc.strip().lower() in query.lower() for kc in keywords_close_skill) and last_speak_output in allowed_closing_contexts):
+        logger.info("Closing skill from keyword command (context verified)")
         return CancelOrStopIntentHandler().handle(handler_input)
-    
-    # If it is not a keyword, the flow continues normally.
+
+    # If it is not a keyword or the context does not allow closing
     return None
+
 
 # Calls the Home Assistant API and handles the response
 def process_conversation(query):
