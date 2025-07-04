@@ -242,6 +242,8 @@ Despite the Alexa documentation’s disclaimer, however, `Let’s Encrypt` certi
 
   #### This setup add prompter feature to enable Alexa conversations started from Home Assistant
 
+  > ⚠️ **Before continuing**, ensure that you must have [Alexa Media Player](https://github.com/alandtse/alexa_media_player) installed and configured.
+
   1. Enable the configuration in Alexa skill:
     - Verify that the `assist_input_entity` environment variable is created and configured as below in AWS Lambda:
 

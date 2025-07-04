@@ -242,6 +242,8 @@ Apesar do aviso de isenção de responsabilidade da documentação da Alexa, os 
 
 #### Esta configuração adiciona o recurso de prompter para permitir conversas da Alexa iniciadas a partir do Home Assistant
 
+> ⚠️ **Antes de continuar**, garanta que você possui o [Alexa Media Player](https://github.com/alandtse/alexa_media_player) instalado e configurado.
+
 1. Ative a configuração na skill da Alexa:
    - Verifique se a variável de ambiente `assist_input_entity` foi criada e configurada conforme abaixo no AWS Lambda:
 
