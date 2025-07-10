@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+import warnings
+import sys
+
+if not sys.warnoptions:
+    warnings.filterwarnings("ignore", category=SyntaxWarning)
+
 import os
 import re
 import logging
@@ -135,7 +141,12 @@ class GptQueryIntentHandler(AbstractRequestHandler):
         return ask_utils.is_intent_name("GptQueryIntent")(handler_input)
 
     def handle(self, handler_input):
-        # User query
+        global account_linking_token
+
+        # Get the account linking token from the Alexa request
+        account_linking_token = handler_input.request_envelope.context.system.user.access_token
+
+        # Handle user query
         query = handler_input.request_envelope.request.intent.slots["query"].value
         logger.info(f"Query received from Alexa: {query}")
         
@@ -147,7 +158,6 @@ class GptQueryIntentHandler(AbstractRequestHandler):
         device_id = ""
         home_assistant_room_recognition = bool(os.environ.get("home_assistant_room_recognition", False))
         if home_assistant_room_recognition:
-            # Get the deviceId of the device that executed the skill
             device_id = ". device_id: " + handler_input.request_envelope.context.system.device.device_id
         
         # Initial response stating that the request is being processed
@@ -155,8 +165,8 @@ class GptQueryIntentHandler(AbstractRequestHandler):
         handler_input.response_builder.speak(initial_response).set_should_end_session(False)
 
         # Execute the asynchronous part with asyncio
-        loop = asyncio.new_event_loop()  # Cria um novo event loop
-        asyncio.set_event_loop(loop)  # Define o loop de eventos para a thread atual
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
         future = loop.run_in_executor(executor, process_conversation, query + device_id)
         response = loop.run_until_complete(future)
 
