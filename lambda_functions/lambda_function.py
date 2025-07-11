@@ -373,6 +373,17 @@ class SessionEndedRequestHandler(AbstractRequestHandler):
     def handle(self, handler_input):
         return handler_input.response_builder.response
 
+class CanFulfillIntentRequestHandler(AbstractRequestHandler):
+    def can_handle(self, handler_input):
+        return ask_utils.is_request_type("CanFulfillIntentRequest")(handler_input)
+
+    def handle(self, handler_input):
+        intent_name = handler_input.request_envelope.request.intent.name if handler_input.request_envelope.request.intent else None
+        if intent_name == "GptQueryIntent":
+            return handler_input.response_builder.can_fulfill("YES").add_can_fulfill_intent("YES").response
+        else:
+            return handler_input.response_builder.can_fulfill("NO").add_can_fulfill_intent("NO").response
+
 class CatchAllExceptionHandler(AbstractExceptionHandler):
     def can_handle(self, handler_input, exception):
         return True
@@ -388,6 +399,6 @@ sb.add_request_handler(GptQueryIntentHandler())
 sb.add_request_handler(HelpIntentHandler())
 sb.add_request_handler(CancelOrStopIntentHandler())
 sb.add_request_handler(SessionEndedRequestHandler())
+sb.add_request_handler(CanFulfillIntentRequestHandler())
 sb.add_exception_handler(CatchAllExceptionHandler())
-
 lambda_handler = sb.lambda_handler()

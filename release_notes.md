@@ -10,6 +10,7 @@
 - Start a conversation with prompt from Home Assistant (thanks to [t07que])
 - Fixed Issue #16
 - Added Spanish (Mexico) language
+- Added ASK feature support
 
 ---
 
@@ -25,3 +26,4 @@
 - Adicionado opção para iniciar uma conversa com Alexa a partir de um prompt do Home Assistant
 - Corrigido o Issue #16
 - Adicionado o idioma espanho (México)
+- Adicionado suporte à funcionalidade de perguntar à skill

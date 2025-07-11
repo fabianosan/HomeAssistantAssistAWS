@@ -12,7 +12,8 @@ features or usage can change significantly between releases._
 1. [About](#about)
 2. [Features](#features)
 3. [Installation](#installation)
-4. [Supported languages](#supported-languages)
+4. [How to use](#how-to-use)
+5. [Supported languages](#supported-languages)
 
 ## About
 
@@ -28,8 +29,8 @@ This is an Alexa skill model that integrates Home Assistant Assist or your prefe
     - Interact with [Extended Open AI](https://github.com/jekalmin/extended_openai_conversation) integration
     - Interact with [Google Generative AI](https://www.home-assistant.io/integrations/google_generative_ai_conversation) integration
 - Open Home Assistant dashboard:
-    - Say 'open home assistant' or 'open dashboard' to open your prefered dashboard in Home Assistant.
-    - Or click on the sceen to open.
+    - Open your prefered Home Assistant dashboard in Echo Show screen.
+    - Click on the Echo Show sceen to open your dashboard.
 - Others:
     - Start a conversation with prompt from Home Assistant (thanks to [t07que](https://github.com/t07que))
     - Multi-language support _(see [Supported languages](#supported-languages))_
@@ -39,6 +40,14 @@ If you have a feature idea, open a issue to suggest your idea for implementation
 ## Installation
 
 For instructions how to set this skill up refer to the [installation](doc/en/INSTALLATION.md) or [update](doc/en/UPDATE.md) page.
+
+## How to use
+
+- Say `Alexa, open home smart` (or your defined skill invoication name):
+    - Turn on the kitchen lights.
+    - Open home assistant.
+    
+- Or say `Alexa, ask smart home to turn on kitchen lights` or `Alexa, ask smart home to open home assistant`:
 
 ## Supported languages
 
@@ -81,7 +90,8 @@ _Nota: Este projeto ainda está em uma fase alfa muito inicial, o que significa 
 1. [Sobre](#sobre)
 2. [Recursos](#recursos)
 3. [Instalação](#instalação)
-4. [Idiomas suportados](#idiomas-suportados)
+4. [Como usar](#como-usar)
+5. [Idiomas suportados](#idiomas-suportados)
 
 ## Sobre
 
@@ -97,8 +107,8 @@ Este é um modelo de skill Alexa que integra o Home Assistant Assist ou sua IA G
     - Interagir com a integração [Extended Open AI](https://github.com/jekalmin/extended_openai_conversation)
     - Interagir com a integração [Google Generative AI](https://www.home-assistant.io/integrations/google_generative_ai_conversation)
 - Abrir painel do Home Assistant:
-    - Diga 'abrir home assistant' ou 'abrir painel' para abrir seu painel preferido no Home Assistant.
-    - Ou clique na tela para abrir.
+    - Abra seu dashboard preferido do Home Assistant na tela do Echo Show.
+    - Clique na tela do Echo Show para abrir seu dashboard.
 - Outros:
     - Iniciar uma conversa com a Alexa de um prompt do Home Assistant (agradecimento ao [t07que](https://github.com/t07que))
     - Suporte a vários idiomas (veja [Idiomas suportados](#idiomas-suportados))
@@ -108,6 +118,14 @@ Se você tiver uma ideia de recurso, abra um issue para sugerir sua ideia para i
 ## Instalação
 
 Para obter instruções sobre como configurar essa skill, consulte a página de [instalação](doc/pt/INSTALLATION.md) ou [atualização](doc/pt/UPDATE.md).
+
+## Como usar
+
+- Diga `Alexa, abrir casa inteligente` (ou o nome de invocação definido para a skill):
+    - Acenda as luzes da cozinha.
+    - Abra o home assistant.
+    
+- Ou diga `Alexa, peça para casa inteligente acender as luzes da cozinha` ou `Alexa, peça para casa inteligente abrir o
 
 ## Idiomas suportados
 
