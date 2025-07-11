@@ -58,11 +58,12 @@ home_assistant_url = os.environ.get('home_assistant_url', "").strip("/")
 apl_document_token = str(uuid.uuid4())
 assist_input_entity = os.environ.get('assist_input_entity', "input_text.assistant_input")
 ask_for_further_commands = bool(os.environ.get('ask_for_further_commands', False))
+suppress_greeting = bool(os.environ.get('suppress_greeting', False))
 
 # Helper: fetch text input via webhook
 def fetch_prompt_from_ha():
     """
-    Reads the state of your input_text helper directly via REST.
+    Reads the state of your input_text helper directly via REST API.
     """
     try:
         url = f"{home_assistant_url}/api/states/{assist_input_entity}"
@@ -85,7 +86,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
         return ask_utils.is_request_type("LaunchRequest")(handler_input)
 
     def handle(self, handler_input):
-        global conversation_id, last_interaction_date, is_apl_supported, account_linking_token
+        global conversation_id, last_interaction_date, is_apl_supported, account_linking_token, suppress_greeting
         
         # Load locale per user
         locale = handler_input.request_envelope.request.locale
@@ -133,8 +134,12 @@ class LaunchRequestHandler(AbstractRequestHandler):
             # First run of the day
             speak_output = globals().get("alexa_speak_welcome_message")
             last_interaction_date = current_date
-            
-        return handler_input.response_builder.speak(speak_output).ask(speak_output).response
+
+        if suppress_greeting:
+            # Não fala nem pergunta nada, apenas aguarda comando
+            return handler_input.response_builder.response
+        else:
+            return handler_input.response_builder.speak(speak_output).ask(speak_output).response
 
 class GptQueryIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):

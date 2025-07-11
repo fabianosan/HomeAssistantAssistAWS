@@ -11,6 +11,7 @@
 - Fixed Issue #16
 - Added Spanish (Mexico) language
 - Added ASK feature support
+- Added option to disable greeting question
 
 ---
 
@@ -25,5 +26,6 @@
 - Adicionada nova opção de configuração `ask_for_further_commands` para controlar o comportamento da Alexa ao perguntar por mais comandos.
 - Adicionado opção para iniciar uma conversa com Alexa a partir de um prompt do Home Assistant
 - Corrigido o Issue #16
-- Adicionado o idioma espanho (México)
+- Adicionado o idioma espanhol (México)
 - Adicionado suporte à funcionalidade de perguntar à skill
+- Adicionado opção para desabilitar a saudação inicial
