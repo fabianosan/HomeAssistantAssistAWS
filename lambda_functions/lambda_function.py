@@ -80,7 +80,6 @@ def fetch_prompt_from_ha():
         logger.error(f"Error fetching prompt from HA state: {e}")
     return ""
 
-
 class LaunchRequestHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         return ask_utils.is_request_type("LaunchRequest")(handler_input)
@@ -140,6 +139,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
         else:
             return handler_input.response_builder.speak(speak_output).ask(speak_output).response
 
+# Execute the asynchronous part with asyncio
 def run_async_in_executor(func, *args):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
@@ -147,7 +147,6 @@ def run_async_in_executor(func, *args):
         return loop.run_until_complete(loop.run_in_executor(executor, func, *args))
     finally:
         loop.close()
-
 
 class GptQueryIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
@@ -252,7 +251,7 @@ def process_conversation(query):
         logger.debug(f"HA request url: {ha_api_url}")        
         logger.debug(f"HA request data: {data}")
         
-        response = requests.post(ha_api_url, headers=headers, json=data, timeout=10)
+        response = requests.post(ha_api_url, headers=headers, json=data)
         
         logger.debug(f"HA response status: {response.status_code}")
         logger.debug(f"HA response data: {response.text}")
@@ -313,28 +312,31 @@ def process_conversation(query):
         logger.error(f"Error processing response: {str(e)}", exc_info=True)
         return globals().get("alexa_speak_error")
 
+# Replaces incorrectly generated words by Alexa interpreter in the query
 def replace_words(query):
     query = query.replace('4.º','quarto')
     return query
 
+# Replaces words and special characters to improve API response speech
 def improve_response(speech):
     global user_locale
     speech = speech.replace(':\n\n', '').replace('\n\n', '. ').replace('\n', ',').replace('-', '').replace('_', ' ')
 
-    # change decimal seperator if user_locale = "de-DE"
+    # Change decimal separator if user_locale = "de-DE"
     if user_locale == "DE":
-        # only replace decimal seperators and not 1.000 seperators
-        speech = re.sub(r'(\d+)\.(\d{1,3})(?!\d)', r'\1,\2', speech)  # Dezimalpunkt (z. B. 2.4 -> 2,4)
+        # Only replace decimal separators and not 1.000 separators
+        speech = re.sub(r'(\d+)\.(\d{1,3})(?!\d)', r'\1,\2', speech)  # Decimal point (e.g. 2.4 -> 2,4)
     
     speech = re.sub(r'[^A-Za-z0-9çÇáàâãäéèêíïóôõöúüñÁÀÂÃÄÉÈÊÍÏÓÔÕÖÚÜÑ\sß.,!?°]', '', speech)
     return speech
 
+# Loads the initial APL screen template
 def load_template(filepath):
     with open(filepath, encoding='utf-8') as f:
         template = json.load(f)
 
     if filepath == 'apl_openha.json':
-        # Localiza os textos dinâmicos do APL 
+        # Locate dynamic texts in the APL
         template['mainTemplate']['items'][0]['items'][2]['text'] = globals().get("echo_screen_welcome_text")
         template['mainTemplate']['items'][0]['items'][3]['text'] = globals().get("echo_screen_click_text")
         template['mainTemplate']['items'][0]['items'][4]['onPress']['source'] = get_hadash_url()
@@ -342,8 +344,10 @@ def load_template(filepath):
 
     return template
 
+# Opens Home Assistant dashboard in Silk browser
 def open_page(handler_input):
     if is_apl_supported:
+        # Renders an empty template, required for the OpenURL command
         # https://amazon.developer.forums.answerhub.com/questions/220506/alexa-open-a-browser.html
         
         handler_input.response_builder.add_directive(
@@ -361,6 +365,7 @@ def open_page(handler_input):
             )
         )
 
+# Builds the Home Assistant dashboard URL
 def get_hadash_url():
     ha_dashboard_url = home_assistant_url
     ha_dashboard_url += "/{}".format(os.environ.get("home_assistant_dashboard", "lovelace"))
