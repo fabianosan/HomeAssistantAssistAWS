@@ -136,10 +136,18 @@ class LaunchRequestHandler(AbstractRequestHandler):
             last_interaction_date = current_date
 
         if suppress_greeting:
-            # Não fala nem pergunta nada, apenas aguarda comando
             return handler_input.response_builder.response
         else:
             return handler_input.response_builder.speak(speak_output).ask(speak_output).response
+
+def run_async_in_executor(func, *args):
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        return loop.run_until_complete(loop.run_in_executor(executor, func, *args))
+    finally:
+        loop.close()
+
 
 class GptQueryIntentHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
@@ -148,38 +156,40 @@ class GptQueryIntentHandler(AbstractRequestHandler):
     def handle(self, handler_input):
         global account_linking_token
 
-        # Get the account linking token from the Alexa request
-        account_linking_token = handler_input.request_envelope.context.system.user.access_token
+        request = handler_input.request_envelope.request
+        context = handler_input.request_envelope.context
+        response_builder = handler_input.response_builder
 
-        # Handle user query
-        query = handler_input.request_envelope.request.intent.slots["query"].value
+        # Get the account linking token
+        account_linking_token = context.system.user.access_token
+
+        # Extract user query
+        query = request.intent.slots["query"].value
         logger.info(f"Query received from Alexa: {query}")
-        
-        # Handles specific commands/keywords
-        response = keywords_exec(query, handler_input)
-        if response:
-            return response
-        
-        device_id = ""
-        home_assistant_room_recognition = bool(os.environ.get("home_assistant_room_recognition", False))
-        if home_assistant_room_recognition:
-            device_id = ". device_id: " + handler_input.request_envelope.context.system.device.device_id
-        
-        # Initial response stating that the request is being processed
-        initial_response = globals().get("alexa_speak_processing")
-        handler_input.response_builder.speak(initial_response).set_should_end_session(False)
 
-        # Execute the asynchronous part with asyncio
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        future = loop.run_in_executor(executor, process_conversation, query + device_id)
-        response = loop.run_until_complete(future)
+        # Handle keyword-based logic
+        keyword_response = keywords_exec(query, handler_input)
+        if keyword_response:
+            return keyword_response
+
+        # Include device ID if needed
+        device_id = ""
+        if os.environ.get("home_assistant_room_recognition", "false").lower() == "true":
+            device_id = f". device_id: {context.system.device.device_id}"
+
+        # Say processing message while async task runs
+        processing_msg = globals().get("alexa_speak_processing")
+        response_builder.speak(processing_msg).set_should_end_session(False)
+
+        # Run async call
+        full_query = query + device_id
+        response = run_async_in_executor(process_conversation, full_query)
 
         logger.debug(f"Ask for further commands enabled: {ask_for_further_commands}")
         if ask_for_further_commands:
-            return handler_input.response_builder.speak(response).ask(globals().get("alexa_speak_question")).response
+            return response_builder.speak(response).ask(globals().get("alexa_speak_question")).response
         else:
-            return handler_input.response_builder.speak(response).set_should_end_session(True).response
+            return response_builder.speak(response).set_should_end_session(True).response
 
 # Handles keywords to execute specific commands
 def keywords_exec(query, handler_input):
@@ -238,12 +248,11 @@ def process_conversation(query):
         if conversation_id:
             data["conversation_id"] = conversation_id
 
-        # Faz a requisição na API do Home Assistant
         ha_api_url = "{}/api/conversation/process".format(home_assistant_url)
         logger.debug(f"HA request url: {ha_api_url}")        
         logger.debug(f"HA request data: {data}")
         
-        response = requests.post(ha_api_url, headers=headers, json=data)
+        response = requests.post(ha_api_url, headers=headers, json=data, timeout=10)
         
         logger.debug(f"HA response status: {response.status_code}")
         logger.debug(f"HA response data: {response.text}")
@@ -253,13 +262,14 @@ def process_conversation(query):
         
         if (contenttype == "application/json"):
             response_data = response.json()
+            speech = None
+
             if response.status_code == 200 and "response" in response_data:
                 conversation_id = response_data.get("conversation_id", conversation_id)
                 response_type = response_data["response"]["response_type"]
                 
                 if response_type == "action_done" or response_type == "query_answer":
                     speech = response_data["response"]["speech"]["plain"]["speech"]
-                    # Remover "device_id:" e o que vem depois
                     if "device_id:" in speech:
                         speech = speech.split("device_id:")[0].strip()
                 elif response_type == "error":
@@ -267,7 +277,16 @@ def process_conversation(query):
                     logger.error(f"Error code: {response_data['response']['data']['code']}")
                 else:
                     speech = globals().get("alexa_speak_error")
-                
+
+            if not speech:
+                if "message" in response_data:
+                    message = response_data["message"]
+                    logger.error(f"Empty speech: {message}")
+                    return improve_response(f"{globals().get('alexa_speak_error')} {message}")
+                else:
+                    logger.error(f"Empty speech: {response_data}")
+                    return globals().get("alexa_speak_error")
+
             return improve_response(speech)
         elif (contenttype == "text/html") and int(response.status_code, 0) >= 400:
             errorMatch = re.search(r'<title>(.*?)</title>', response.text, re.IGNORECASE)
@@ -287,7 +306,6 @@ def process_conversation(query):
             return globals().get("alexa_speak_error")
             
     except requests.exceptions.Timeout as te:
-        # Tratamento para timeout
         logger.error(f"Timeout when communicating with Home Assistant: {str(te)}", exc_info=True)
         return globals().get("alexa_speak_timeout")
 
@@ -295,19 +313,14 @@ def process_conversation(query):
         logger.error(f"Error processing response: {str(e)}", exc_info=True)
         return globals().get("alexa_speak_error")
 
-# Substitui palavras geradas incorretamente pelo interpretador da Alexa na query
 def replace_words(query):
     query = query.replace('4.º','quarto')
     return query
 
-# Substitui palavras e caracteres especiais para falar a resposta da API
 def improve_response(speech):
-    # Função para melhorar a legibilidade da resposta
+    global user_locale
     speech = speech.replace(':\n\n', '').replace('\n\n', '. ').replace('\n', ',').replace('-', '').replace('_', ' ')
-    
-    #replacements = str.maketrans('ïöüÏÖÜ', 'iouIOU')
-    #speech = speech.translate(replacements)
-    
+
     # change decimal seperator if user_locale = "de-DE"
     if user_locale == "DE":
         # only replace decimal seperators and not 1.000 seperators
@@ -316,9 +329,7 @@ def improve_response(speech):
     speech = re.sub(r'[^A-Za-z0-9çÇáàâãäéèêíïóôõöúüñÁÀÂÃÄÉÈÊÍÏÓÔÕÖÚÜÑ\sß.,!?°]', '', speech)
     return speech
 
-# Carrega o template do APL da tela inicial
 def load_template(filepath):
-    # Carrega o template da interface gráfica
     with open(filepath, encoding='utf-8') as f:
         template = json.load(f)
 
@@ -331,10 +342,8 @@ def load_template(filepath):
 
     return template
 
-# Abre dashboard do Home Assistant no navegador Silk
 def open_page(handler_input):
     if is_apl_supported:
-        # Renderizar modelo vazio, necessário para o comando OpenURL
         # https://amazon.developer.forums.answerhub.com/questions/220506/alexa-open-a-browser.html
         
         handler_input.response_builder.add_directive(
@@ -352,12 +361,10 @@ def open_page(handler_input):
             )
         )
 
-# Monta a URL do dashboard do Home Assistant
 def get_hadash_url():
     ha_dashboard_url = home_assistant_url
     ha_dashboard_url += "/{}".format(os.environ.get("home_assistant_dashboard", "lovelace"))
     
-    # Adicionando o modo kioskmode, se estiver ativado
     home_assistant_kioskmode = bool(os.environ.get("home_assistant_kioskmode", False))
     if home_assistant_kioskmode:
         ha_dashboard_url += '?kiosk'
