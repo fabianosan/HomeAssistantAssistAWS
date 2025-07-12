@@ -135,7 +135,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
             last_interaction_date = current_date
 
         if suppress_greeting:
-            return handler_input.response_builder.response
+            return handler_input.response_builder.ask("").response
         else:
             return handler_input.response_builder.speak(speak_output).ask(speak_output).response
 
