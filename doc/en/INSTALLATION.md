@@ -273,8 +273,7 @@ Despite the Alexa documentation’s disclaimer, however, `Let’s Encrypt` certi
       5. Click the three-dot menu (⋮) and switch to **YAML mode**.
       6. Paste the following YAML into the editor.  
         Replace the placeholders:
-          - `*your Skill ID*` → your actual Alexa skill ID  
-          - `*the alexa you want to target*` → the `media_player` entity ID of your Alexa device
+          - `*Your Skill ID*` → Your actual Alexa skill ID
 
           ```
           sequence:
@@ -286,10 +285,10 @@ Despite the Alexa documentation’s disclaimer, however, `Let’s Encrypt` certi
                 entity_id: input_text.assistant_input
             - action: media_player.play_media
               data:
-                media_content_id: *your Skill ID*
+                media_content_id: *Your Skill ID*
                 media_content_type: skill
               target:
-                entity_id: *the alexa you want to target*
+                entity_id: "{{alexa_device}}"
             - delay:
                 hours: 0
                 minutes: 0
@@ -300,44 +299,48 @@ Despite the Alexa documentation’s disclaimer, however, `Let’s Encrypt` certi
               data:
                 value: none
               target:
-                entity_id: input_text.assistant_input 
-          alias: prompt on Alexa device
+                entity_id: input_text.assistant_input
+          alias: Prompt on Alexa device
           description: ""
           fields:
             prompt:
               selector:
                 text: null
               name: prompt
-              description: >-
-                The prompt to pass to the skill, used as the first message to start a conversation.
+              description: The prompt to pass to the skill, used as the first message to start a conversation.
               required: true
-          ```
+            alexa_device:
+              selector:
+                text: null
+              name: alexa_device
+              description: The Alexa device you need to start the skill to prompt.
+              required: true
+         ```
 
       7. Click **Save**.
 
   4. Call the Script from an Automation
 
-      Now that the script is set up, you can trigger it from an automation. This will:
-        - Pass a prompt to your Alexa skill;
-        - Begin a spoken conversation using the assistant's response.
-        ### Example Automation Action
+    Now that the script is configured, you can trigger it from an automation or test it using Developer Tools > Actions:
+      - Send a prompt to your Alexa skill;
+      - Start a voice conversation with the assistant's response.
+      ### Example Automation Action
 
-        ```
-        action: script.prompt_alexa_device
-        metadata: {}
-        data:
-          prompt: >-
-            Suggest that I remember to lock all doors and windows in the house before leaving
-        ```
+      ```
+      action: script.prompt_on_alexa_device
+      data:
+        prompt: Suggest that I remember to lock all doors and windows before leaving
+        alexa_device: media_player.echoshow_office
+      ```
 
-        Other sample prompts:
+      Other prompt examples:
 
-        ```
-        - What's the weather forecast?
-        - Ask if I'd like to turn off the lights
-        ```
+      ```
+      - What is the weather forecast?
+      - Ask if I would like to turn off the lights
+      ```
 
-        > ⚠️ **Important:** Prompts must be **fewer than 255 characters**, or the call will fail.
+      > ⚠️ **Important:** Prompts must be **less than 255 characters**, otherwise the call will not
 
 ## Alexa Locale
 The locale should match the location and language used for your Amazon Echo devices.

@@ -267,67 +267,70 @@ Apesar do aviso de isenção de responsabilidade da documentação da Alexa, os 
 3. Crie um Script no Home Assistant:
 
     1. Vá até o [Console do Desenvolvedor Alexa](https://developer.amazon.com/alexa/console/ask).
-    2. Na página inicial da sua skill, clique em **Copiar ID da Skill**.
+    2. Na página inicial da sua skill, clique em **Copy Skill ID**.
     3. No Home Assistant, vá para **Configurações → Automatizações e Cenas → Scripts**.
     4. Clique em **Adicionar Script** e dê um nome como `Prompt Alexa Device`.
-    5. Clique no menu de três pontos (⋮) e mude para o **modo YAML**.
+    5. Clique no menu de três pontos (⋮) e mude para o **Modo YAML**.
     6. Cole o seguinte YAML no editor.  
        Substitua os espaços reservados:
-         - `*your Skill ID*` → pelo ID real da sua skill Alexa  
-         - `*the alexa you want to target*` → pelo ID da entidade `media_player` do seu dispositivo Alexa
-
+         - `*Sua Skill ID*` → Pelo ID real da sua skill Alexa  
+         
          ```
          sequence:
-           - action: input_text.set_value
-             metadata: {}
-             data:
-               value: "{{prompt}}"
-             target:
-               entity_id: input_text.assistant_input
-           - action: media_player.play_media
-             data:
-               media_content_id: *your Skill ID*
-               media_content_type: skill
-             target:
-               entity_id: *the alexa you want to target*
-           - delay:
-               hours: 0
-               minutes: 0
-               seconds: 10
-               milliseconds: 0
-           - action: input_text.set_value
-             metadata: {}
-             data:
-               value: none
-             target:
-               entity_id: input_text.assistant_input 
-         alias: prompt on Alexa device
-         description: ""
-         fields:
-           prompt:
-             selector:
-               text: null
-             name: prompt
-             description: >-
-               O prompt a ser enviado para a skill, usado como a primeira mensagem para iniciar uma conversa.
-             required: true
+          - action: input_text.set_value
+            metadata: {}
+            data:
+              value: "{{prompt}}"
+            target:
+              entity_id: input_text.assistant_input
+          - action: media_player.play_media
+            data:
+              media_content_id: *Sua Skill ID*
+              media_content_type: skill
+            target:
+              entity_id: "{{alexa_device}}"
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 10
+              milliseconds: 0
+          - action: input_text.set_value
+            metadata: {}
+            data:
+              value: none
+            target:
+              entity_id: input_text.assistant_input
+        alias: Prompt on Alexa device
+        description: ""
+        fields:
+          prompt:
+            selector:
+              text: null
+            name: prompt
+            description: The prompt to pass to the skill, used as the first message to start a conversation.
+            required: true
+          alexa_device:
+            selector:
+              text: null
+            name: alexa_device
+            description: The Alexa device you need to start the skill to prompt.
+            required: true
          ```
 
     7. Clique em **Salvar**.
 
 4. Chame o Script a partir de uma Automação
 
-    Agora que o script está configurado, você pode acioná-lo a partir de uma automação. Isso irá:
+    Agora que o script está configurado, você pode acioná-lo a partir de uma automação ou fazer um teste a partir das ferramentas de desenvolvedor > Ações:
       - Enviar um prompt para sua skill da Alexa;
       - Iniciar uma conversa falada com a resposta do assistente.
       ### Exemplo de Ação de Automação
 
       ```
-      action: script.prompt_alexa_device
-      metadata: {}
+      action: script.prompt_on_alexa_device
       data:
-        prompt: >-
-          Sugira que eu lembre de trancar todas as portas e janelas da casa antes de sair
+        prompt: Sugira que eu lembre de trancar todas as portas e janelas da casa antes de sair
+        alexa_device: media_player.echoshow_office
       ```
 
       Outros exemplos de prompt:
