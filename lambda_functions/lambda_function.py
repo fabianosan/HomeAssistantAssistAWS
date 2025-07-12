@@ -80,6 +80,15 @@ def fetch_prompt_from_ha():
         logger.error(f"Error fetching prompt from HA state: {e}")
     return ""
 
+def localize(handler_input):
+    # Load locale per user
+    locale = handler_input.request_envelope.request.locale
+    load_config(f"locale/{locale}.lang")
+
+    # save user_locale var for regional differences in number handling like 2.4°C / 2,4°C
+    global user_locale
+    user_locale = locale.split("-")[1]  # "de-DE" -> "DE" split to respect lang differencies (not country specific)
+
 class LaunchRequestHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         return ask_utils.is_request_type("LaunchRequest")(handler_input)
@@ -87,13 +96,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
     def handle(self, handler_input):
         global conversation_id, last_interaction_date, is_apl_supported, account_linking_token, suppress_greeting
         
-        # Load locale per user
-        locale = handler_input.request_envelope.request.locale
-        load_config(f"locale/{locale}.lang")
-
-        # save user_locale var for regional differences in number handling like 2.4°C / 2,4°C
-        global user_locale
-        user_locale = locale.split("-")[1]  # "de-DE" -> "DE" split to respect lang differencies (not country specific)
+        localize(handler_input)
 
         # Obtaining Account Linking token
         account_linking_token = handler_input.request_envelope.context.system.user.access_token
@@ -405,6 +408,8 @@ class CanFulfillIntentRequestHandler(AbstractRequestHandler):
         return ask_utils.is_request_type("CanFulfillIntentRequest")(handler_input)
 
     def handle(self, handler_input):
+        localize(handler_input)
+        
         intent_name = handler_input.request_envelope.request.intent.name if handler_input.request_envelope.request.intent else None
         if intent_name == "GptQueryIntent":
             return handler_input.response_builder.can_fulfill("YES").add_can_fulfill_intent("YES").response
