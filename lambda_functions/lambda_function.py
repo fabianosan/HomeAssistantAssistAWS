@@ -54,6 +54,7 @@ conversation_id = None
 last_interaction_date = None
 is_apl_supported = False
 account_linking_token = None
+user_locale = "US"  # Default locale
 home_assistant_url = os.environ.get('home_assistant_url', "").strip("/")
 apl_document_token = str(uuid.uuid4())
 assist_input_entity = os.environ.get('assist_input_entity', "input_text.assistant_input")
@@ -157,6 +158,9 @@ class GptQueryIntentHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         global account_linking_token
+
+        # Ensure locale is set correctly
+        localize(handler_input)
 
         request = handler_input.request_envelope.request
         context = handler_input.request_envelope.context
