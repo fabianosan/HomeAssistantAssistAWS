@@ -203,7 +203,7 @@ Apesar do aviso de isenção de responsabilidade da documentação da Alexa, os 
 
   ![](../en/images/skill_accountlinking.png)
 
-### Ativando o reconhecimento de área
+## Ativando o reconhecimento de área
 - **(SÓ FUNCIONA COM IA)** Nesse modo, a skill envia o device id (do dispositivo `echo` que está executando a skill) na chamada da API de conversação do Home Assistant, então com uma instrução de comando para a IA e um rótulo associado no dispositivo, a IA consegue identificador os dispositivo da mesma área onde está localizado sua `Alexa`, para ativar, siga os passos abaixo:
 
   ***Atenção !*** 
@@ -239,7 +239,7 @@ Apesar do aviso de isenção de responsabilidade da documentação da Alexa, os 
   - Depois de fazer login com sucesso, você será redirecionado de volta ao app Alexa.
   - Agora, você pode pedir à Alexa no seu dispositivo Echo ou no App Alexa para abrir a skill, como **Alexa, [seu Nome de Invocação]**.
 
-### Ativando iniciador de conversa com prompt do Home Assistant
+## Ativando iniciador de conversa com prompt do Home Assistant
 
 #### Esta configuração adiciona o recurso de prompter para permitir conversas da Alexa iniciadas a partir do Home Assistant
 

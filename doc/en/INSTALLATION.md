@@ -204,7 +204,7 @@ Despite the Alexa documentation’s disclaimer, however, `Let’s Encrypt` certi
 
   ![](images/skill_accountlinking.png)
 
-### Enabling room recognition
+## Enabling room recognition
 - **(ONLY WORKS WITH AI)** In this mode, the skill sends the device ID (of the `echo` device running the skill) in the Home Assistant conversation API call. With a command instruction for the AI and a label associated with the device, the AI can identify the devices in the same area as your `Alexa`. To activate, follow the steps below:
 
   ***Attention!***
@@ -239,7 +239,7 @@ Despite the Alexa documentation’s disclaimer, however, `Let’s Encrypt` certi
   - After you successfully log in, you will be redirected back to the Alexa app.
   - Now, you can ask Alexa from your Echo device or the Alexa App to open the skill like **Alexa, [your Invocation Name]**.
 
-### Enabling conversation starter with prompt from Home Assistant
+## Enabling conversation starter with prompt from Home Assistant
 
   #### This setup add prompter feature to enable Alexa conversations started from Home Assistant
 
