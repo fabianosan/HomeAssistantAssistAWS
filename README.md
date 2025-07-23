@@ -125,7 +125,7 @@ Para obter instruções sobre como configurar essa skill, consulte a página de 
     - Acenda as luzes da cozinha.
     - Abra o home assistant.
     
-- Ou diga `Alexa, peça para casa inteligente acender as luzes da cozinha` ou `Alexa, peça para casa inteligente abrir o
+- Ou diga `Alexa, peça para casa inteligente acender as luzes da cozinha` ou `Alexa, peça para casa inteligente abrir o Home Assistant`
 
 ## Idiomas suportados
 
