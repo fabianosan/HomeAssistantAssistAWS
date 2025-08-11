@@ -58,8 +58,10 @@ user_locale = "US"  # Default locale
 home_assistant_url = os.environ.get('home_assistant_url', "").strip("/")
 apl_document_token = str(uuid.uuid4())
 assist_input_entity = os.environ.get('assist_input_entity', "input_text.assistant_input")
-ask_for_further_commands = bool(os.environ.get('ask_for_further_commands', False))
-suppress_greeting = bool(os.environ.get('suppress_greeting', False))
+home_assistant_room_recognition = os.environ.get("home_assistant_room_recognition", "false")
+home_assistant_kioskmode = os.environ.get("home_assistant_kioskmode", False)
+ask_for_further_commands = os.environ.get('ask_for_further_commands', False)
+suppress_greeting = os.environ.get('suppress_greeting', False)
 
 # Helper: fetch text input via webhook
 def fetch_prompt_from_ha():
@@ -138,7 +140,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
             speak_output = globals().get("alexa_speak_welcome_message")
             last_interaction_date = current_date
 
-        if suppress_greeting:
+        if suppress_greeting.lower() == "true":
             return handler_input.response_builder.ask("").response
         else:
             return handler_input.response_builder.speak(speak_output).ask(speak_output).response
@@ -180,7 +182,7 @@ class GptQueryIntentHandler(AbstractRequestHandler):
 
         # Include device ID if needed
         device_id = ""
-        if os.environ.get("home_assistant_room_recognition", "false").lower() == "true":
+        if home_assistant_room_recognition.lower() == "true":
             device_id = f". device_id: {context.system.device.device_id}"
 
         # Say processing message while async task runs
@@ -192,7 +194,7 @@ class GptQueryIntentHandler(AbstractRequestHandler):
         response = run_async_in_executor(process_conversation, full_query)
 
         logger.debug(f"Ask for further commands enabled: {ask_for_further_commands}")
-        if ask_for_further_commands:
+        if ask_for_further_commands.lower() == "true":
             return response_builder.speak(response).ask(globals().get("alexa_speak_question")).response
         else:
             return response_builder.speak(response).set_should_end_session(True).response
@@ -377,8 +379,7 @@ def get_hadash_url():
     ha_dashboard_url = home_assistant_url
     ha_dashboard_url += "/{}".format(os.environ.get("home_assistant_dashboard", "lovelace"))
     
-    home_assistant_kioskmode = bool(os.environ.get("home_assistant_kioskmode", False))
-    if home_assistant_kioskmode:
+    if home_assistant_kioskmode.lower() == "true":
         ha_dashboard_url += '?kiosk'
     
     logger.debug(f"ha_dashboard_url: {ha_dashboard_url}")
