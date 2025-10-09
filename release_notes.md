@@ -12,6 +12,8 @@
 - Added Spanish (Mexico) language
 - Added ASK feature support
 - Added option to disable greeting question
+- Fixed issue #29 (with boolean configurations)
+- Fixed issue with keyword "no" inside a query/question
 
 ---
 
@@ -29,3 +31,5 @@
 - Adicionado o idioma espanhol (México)
 - Adicionado suporte à funcionalidade de perguntar à skill
 - Adicionado opção para desabilitar a saudação inicial
+- Corrigido erro #29 com configurações boleanas
+- Corrigido erro com a palavra chave "não" dentro de um comando/pergunta
