@@ -48,7 +48,8 @@ logger.setLevel(logging.DEBUG if debug else logging.INFO)
 
 # Thread pool max workers
 executor = ThreadPoolExecutor(max_workers=5)
-
+# Note: config.cfg stores values as strings; we'll normalize expected boolean
+# flags to lowercase strings ("true"/"false") and compare explicitly.
 # Globals for conversation
 conversation_id = None
 last_interaction_date = None
@@ -58,10 +59,10 @@ user_locale = "US"  # Default locale
 home_assistant_url = os.environ.get('home_assistant_url', "").strip("/")
 apl_document_token = str(uuid.uuid4())
 assist_input_entity = os.environ.get('assist_input_entity', "input_text.assistant_input")
-home_assistant_room_recognition = os.environ.get('home_assistant_room_recognition', False)
-home_assistant_kioskmode = os.environ.get('home_assistant_kioskmode', False)
-ask_for_further_commands = os.environ.get('ask_for_further_commands', False)
-suppress_greeting = os.environ.get('suppress_greeting', False)
+home_assistant_room_recognition = str(os.environ.get('home_assistant_room_recognition', 'False')).lower()
+home_assistant_kioskmode = str(os.environ.get('home_assistant_kioskmode', 'False')).lower()
+ask_for_further_commands = str(os.environ.get('ask_for_further_commands', 'False')).lower()
+suppress_greeting = str(os.environ.get('suppress_greeting', 'False')).lower()
 
 # Helper: fetch text input via webhook
 def fetch_prompt_from_ha():
@@ -140,7 +141,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
             speak_output = globals().get("alexa_speak_welcome_message")
             last_interaction_date = current_date
 
-        if suppress_greeting == True:
+        if suppress_greeting == "true":
             return handler_input.response_builder.ask("").response
         else:
             return handler_input.response_builder.speak(speak_output).ask(speak_output).response
@@ -182,7 +183,7 @@ class GptQueryIntentHandler(AbstractRequestHandler):
 
         # Include device ID if needed
         device_id = ""
-        if home_assistant_room_recognition == True:
+        if home_assistant_room_recognition == "true":
             device_id = f". device_id: {context.system.device.device_id}"
 
         # Say processing message while async task runs
@@ -194,7 +195,7 @@ class GptQueryIntentHandler(AbstractRequestHandler):
         response = run_async_in_executor(process_conversation, full_query)
 
         logger.debug(f"Ask for further commands enabled: {ask_for_further_commands}")
-        if ask_for_further_commands == True:
+        if ask_for_further_commands == "true":
             return response_builder.speak(response).ask(globals().get("alexa_speak_question")).response
         else:
             return response_builder.speak(response).set_should_end_session(True).response
@@ -379,7 +380,8 @@ def get_hadash_url():
     ha_dashboard_url = home_assistant_url
     ha_dashboard_url += "/{}".format(os.environ.get("home_assistant_dashboard", "lovelace"))
     
-    if home_assistant_kioskmode == True:
+    
+    if home_assistant_kioskmode == "true":
         ha_dashboard_url += '?kiosk'
     
     logger.debug(f"ha_dashboard_url: {ha_dashboard_url}")
