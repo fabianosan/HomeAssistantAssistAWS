@@ -1797,3 +1797,5 @@ lambda_functions/urllib3-2.5.0.dist-info/METADATA
 lambda_functions/urllib3-2.5.0.dist-info/RECORD
 lambda_functions/urllib3-2.5.0.dist-info/WHEEL
 lambda_functions/urllib3-2.5.0.dist-info/licenses/LICENSE.txt
+__pycache__/
+*.pyc
