@@ -272,27 +272,18 @@ def process_conversation(query):
                 response_type = response_data["response"]["response_type"]
                 
                 if response_type == "action_done" or response_type == "query_answer":
-                    # Prefer SSML over plain text if available
-                    speech_data = response_data["response"]["speech"]
-                    if "ssml" in speech_data and speech_data["ssml"].get("speech"):
-                        speech = speech_data["ssml"]["speech"]
-                        logger.debug(f"Using SSML response: {speech}")
-                    else:
-                        speech = speech_data["plain"]["speech"]
-                        logger.debug(f"Using plain text response: {speech}")
+                    # Extract speech, preferring SSML over plain text
+                    speech, is_ssml = extract_speech(response_data["response"]["speech"])
                     
-                    if "device_id:" in speech:
+                    if speech and "device_id:" in speech:
                         speech = speech.split("device_id:")[0].strip()
                 elif response_type == "error":
-                    # Prefer SSML over plain text if available
-                    speech_data = response_data["response"]["speech"]
-                    if "ssml" in speech_data and speech_data["ssml"].get("speech"):
-                        speech = speech_data["ssml"]["speech"]
-                    else:
-                        speech = speech_data["plain"]["speech"]
+                    # Extract speech, preferring SSML over plain text
+                    speech, is_ssml = extract_speech(response_data["response"]["speech"])
                     logger.error(f"Error code: {response_data['response']['data']['code']}")
                 else:
                     speech = globals().get("alexa_speak_error")
+                    is_ssml = False
 
             if not speech:
                 if "message" in response_data:
@@ -303,9 +294,8 @@ def process_conversation(query):
                     logger.error(f"Empty speech: {response_data}")
                     return globals().get("alexa_speak_error")
 
-            # If speech starts with <speak>, it's SSML - return as-is
-            # Otherwise, apply text improvements for plain text
-            if speech.strip().startswith("<speak>"):
+            # If speech is SSML, return as-is; otherwise apply text improvements
+            if is_ssml:
                 logger.debug("Returning SSML response")
                 return speech
             else:
@@ -335,6 +325,32 @@ def process_conversation(query):
     except Exception as e:
         logger.error(f"Error processing response: {str(e)}", exc_info=True)
         return globals().get("alexa_speak_error")
+
+# Extract speech from Home Assistant response, preferring SSML over plain text
+def extract_speech(speech_data):
+    """
+    Extract speech from HA response data, preferring SSML when available.
+    
+    Args:
+        speech_data: Dictionary containing speech data from HA response
+        
+    Returns:
+        Tuple of (speech_text, is_ssml)
+    """
+    # Check for SSML first
+    if "ssml" in speech_data and speech_data["ssml"].get("speech"):
+        speech = speech_data["ssml"]["speech"]
+        logger.debug(f"Using SSML response: {speech}")
+        return speech, True
+    
+    # Fall back to plain text
+    if "plain" in speech_data and speech_data["plain"].get("speech"):
+        speech = speech_data["plain"]["speech"]
+        logger.debug(f"Using plain text response: {speech}")
+        return speech, False
+    
+    # No speech found
+    return None, False
 
 # Replaces incorrectly generated words by Alexa interpreter in the query
 def replace_words(query):
