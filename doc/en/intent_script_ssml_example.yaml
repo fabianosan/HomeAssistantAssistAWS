@@ -1,0 +1,14 @@
+```yaml
+# Example intent script for README
+# Place it in intent_script as intent variant in HA and you habe ssml instead of text speaking
+HelpIntent:
+  speech:
+    type: ssml
+    text: |
+      <speak>
+        This intent demonstrates a simple SSML response from Home Assistant.
+        <amazon:effect name="whispered">It shows how to return SSML with Alexa's whisper effect.</amazon:effect>
+        <break time="300ms"/>
+        Use <emphasis level="moderate">break</emphasis>, <prosody rate="slow">prosody</prosody>, and <emphasis level="strong">emphasis</emphasis> to control pacing and tone.
+      </speak>
+```
