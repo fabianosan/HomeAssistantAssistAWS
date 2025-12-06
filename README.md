@@ -31,6 +31,9 @@ This is an Alexa skill model that integrates Home Assistant Assist or your prefe
 - Open Home Assistant dashboard:
     - Open your prefered Home Assistant dashboard in Echo Show screen.
     - Click on the Echo Show sceen to open your dashboard.
+
+- Supports SSML in Intent Scripts
+
 - Others:
     - Start a conversation with prompt from Home Assistant (thanks to [t07que](https://github.com/t07que))
     - Multi-language support _(see [Supported languages](#supported-languages))_
@@ -147,4 +150,5 @@ A skill tem suporte para os seguintes idiomas:
 - Português (Brasil)
 - Português (Portugal)
 - Russo (Rússia)
+
 - Eslovaco (Eslováquia)
