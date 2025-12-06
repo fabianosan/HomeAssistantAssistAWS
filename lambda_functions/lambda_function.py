@@ -272,11 +272,24 @@ def process_conversation(query):
                 response_type = response_data["response"]["response_type"]
                 
                 if response_type == "action_done" or response_type == "query_answer":
-                    speech = response_data["response"]["speech"]["plain"]["speech"]
+                    # Prefer SSML over plain text if available
+                    speech_data = response_data["response"]["speech"]
+                    if "ssml" in speech_data and speech_data["ssml"].get("speech"):
+                        speech = speech_data["ssml"]["speech"]
+                        logger.debug(f"Using SSML response: {speech}")
+                    else:
+                        speech = speech_data["plain"]["speech"]
+                        logger.debug(f"Using plain text response: {speech}")
+                    
                     if "device_id:" in speech:
                         speech = speech.split("device_id:")[0].strip()
                 elif response_type == "error":
-                    speech = response_data["response"]["speech"]["plain"]["speech"]
+                    # Prefer SSML over plain text if available
+                    speech_data = response_data["response"]["speech"]
+                    if "ssml" in speech_data and speech_data["ssml"].get("speech"):
+                        speech = speech_data["ssml"]["speech"]
+                    else:
+                        speech = speech_data["plain"]["speech"]
                     logger.error(f"Error code: {response_data['response']['data']['code']}")
                 else:
                     speech = globals().get("alexa_speak_error")
@@ -290,7 +303,14 @@ def process_conversation(query):
                     logger.error(f"Empty speech: {response_data}")
                     return globals().get("alexa_speak_error")
 
-            return improve_response(speech)
+            # If speech starts with <speak>, it's SSML - return as-is
+            # Otherwise, apply text improvements for plain text
+            if speech.strip().startswith("<speak>"):
+                logger.debug("Returning SSML response")
+                return speech
+            else:
+                logger.debug("Returning plain text response with improvements")
+                return improve_response(speech)
         elif (contenttype == "text/html") and int(response.status_code, 0) >= 400:
             errorMatch = re.search(r'<title>(.*?)</title>', response.text, re.IGNORECASE)
             
