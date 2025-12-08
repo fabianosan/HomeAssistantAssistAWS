@@ -150,5 +150,4 @@ A skill tem suporte para os seguintes idiomas:
 - Português (Brasil)
 - Português (Portugal)
 - Russo (Rússia)
-
 - Eslovaco (Eslováquia)

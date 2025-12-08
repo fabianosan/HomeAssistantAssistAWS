@@ -14,6 +14,7 @@
 - Added option to disable greeting question
 - Fixed issue #29 (with boolean configurations)
 - Fixed issue with keyword "no" inside a query/question
+- Add SSML support and README example intent (HelpIntent) #30 (thanks to [dezihh])
 
 ---
 
@@ -33,3 +34,4 @@
 - Adicionado opção para desabilitar a saudação inicial
 - Corrigido erro #29 com configurações boleanas
 - Corrigido erro com a palavra chave "não" dentro de um comando/pergunta
+- Adicionado suporte a SSML com exemplo no README (HelpIntent) #30
