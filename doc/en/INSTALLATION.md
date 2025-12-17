@@ -93,7 +93,7 @@ Next, you need to create a Lambda function.
   - (optional) Key = **assist_input_entity**: Value = `input_text.assistant_input`. Enable conversation starter with prompt from Home Assistant. **Attention**, this feature require [extra setup in Home Assistant](#enabling-conversation-starter-with-prompt-from-home-assistant).
   - (optional) Key = **ask_for_further_commands**, Value = `True` or `False`. This variable determines whether Alexa will ask for further commands after responding. Set it to `True` to enable this behavior or `False` to disable it. The default is `False`.
   - (optional) Key = **suppress_greeting**, Value = `True` or `False`. This variable determines whether Alexa will speak the initial greeting/question when the skill is opened. Set it to `True` to disable the greeting or `False` to keep it. The default is `False`.
-  - (optional) Key = **enable_acknowledgment_sound**, Value = `True` or `False`. This variable determines whether Alexa will play a pleasant acknowledgment sound when your request is received and being processed. This is useful for slow LLM responses so the user knows their request is being handled. Set it to `True` to enable the sound or `False` to disable it. The default is `False`.
+  - (optional) Key = **enable_acknowledgment_sound**, Value = `True` or `False`. This variable determines whether Alexa respond an acknowledgment when your request is received and being processed. This is useful for slow LLM responses so the user knows their request is being handled. Set it to `True` to enable the sound or `False` to disable it. The default is `False`.
   - (optional) Key = **debug**, Value = `True`. Set this variable to log the debug messages and allow the `home_assistant_token` environment variable.
   - (optional, _not recommended_) Key = **home_assistant_token**, Value = Your Home Assistant Long-Lived Access Token. You will connect your Alexa Skill with your Home Assistant user account in the later steps, meaning you don’t need to add it here. However, you can add it here for debugging purposes. _(You should remove and delete this environment variable after debugging is finished)_.
 - Click the **Save** button in the bottom right-hand corner.
@@ -345,3 +345,4 @@ Despite the Alexa documentation’s disclaimer, however, `Let’s Encrypt` certi
 ## Alexa Locale
 The locale should match the location and language used for your Amazon Echo devices.
 _The current supported skill locales are described in main page page._
+
