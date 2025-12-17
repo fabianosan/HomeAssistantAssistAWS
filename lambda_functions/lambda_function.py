@@ -16,9 +16,13 @@ import requests
 import requests.exceptions
 import ask_sdk_core.utils as ask_utils
 
-from ask_sdk_core.skill_builder import SkillBuilder
+from ask_sdk_core.skill_builder import CustomSkillBuilder
+from ask_sdk_core.api_client import DefaultApiClient
 from ask_sdk_core.dispatch_components import AbstractRequestHandler, AbstractExceptionHandler
 from ask_sdk_model.interfaces.alexa.presentation.apl import RenderDocumentDirective, ExecuteCommandsDirective, OpenUrlCommand
+from ask_sdk_model.services.directive import (
+    SendDirectiveRequest, Header, SpeakDirective
+)
 from datetime import datetime, timezone, timedelta
 from concurrent.futures import ThreadPoolExecutor
 
@@ -63,6 +67,7 @@ home_assistant_room_recognition = str(os.environ.get('home_assistant_room_recogn
 home_assistant_kioskmode = str(os.environ.get('home_assistant_kioskmode', 'False')).lower()
 ask_for_further_commands = str(os.environ.get('ask_for_further_commands', 'False')).lower()
 suppress_greeting = str(os.environ.get('suppress_greeting', 'False')).lower()
+enable_acknowledgment_sound = str(os.environ.get('enable_acknowledgment_sound', 'False')).lower()
 
 # Helper: fetch text input via webhook
 def fetch_prompt_from_ha():
@@ -146,6 +151,44 @@ class LaunchRequestHandler(AbstractRequestHandler):
         else:
             return handler_input.response_builder.speak(speak_output).ask(speak_output).response
 
+# Helper function to send progressive response with acknowledgment sound
+def send_acknowledgment_sound(handler_input, request):
+    """
+    Sends a progressive response with an acknowledgment sound to inform the user
+    that their request is being processed.
+    
+    Args:
+        handler_input: The handler input from Alexa
+        request: The request object containing request_id
+        
+    Returns:
+        bool: True if sound was sent successfully, False otherwise
+    """
+    if not request.request_id:
+        logger.warning("Cannot send acknowledgment sound: missing request_id")
+        return False
+        
+    processing_msg = globals().get("alexa_speak_processing")
+    if not processing_msg:
+        logger.warning("Cannot send acknowledgment sound: missing alexa_speak_processing")
+        return False
+    
+    try:
+        # Send progressive response with acknowledgment sound
+        directive_header = Header(request_id=request.request_id)
+        speak_directive = SpeakDirective(speech=processing_msg)
+        directive_request = SendDirectiveRequest(
+            header=directive_header, directive=speak_directive
+        )
+        
+        directive_service_client = handler_input.service_client_factory.get_directive_service()
+        directive_service_client.enqueue(directive_request)
+        logger.debug("Acknowledgment sound sent via progressive response")
+        return True
+    except Exception as e:
+        logger.warning(f"Failed to send acknowledgment sound: {e}")
+        return False
+
 # Execute the asynchronous part with asyncio
 def run_async_in_executor(func, *args):
     loop = asyncio.new_event_loop()
@@ -186,9 +229,9 @@ class GptQueryIntentHandler(AbstractRequestHandler):
         if home_assistant_room_recognition == "true":
             device_id = f". device_id: {context.system.device.device_id}"
 
-        # Say processing message while async task runs
-        processing_msg = globals().get("alexa_speak_processing")
-        response_builder.speak(processing_msg).set_should_end_session(False)
+        # Send acknowledgment sound if enabled (using progressive response)
+        if enable_acknowledgment_sound == "true":
+            send_acknowledgment_sound(handler_input, request)
 
         # Run async call
         full_query = query + device_id
@@ -462,7 +505,7 @@ class CatchAllExceptionHandler(AbstractExceptionHandler):
         speak_output = globals().get("alexa_speak_error")
         return handler_input.response_builder.speak(speak_output).ask(speak_output).response
 
-sb = SkillBuilder()
+sb = CustomSkillBuilder(api_client=DefaultApiClient())
 sb.add_request_handler(LaunchRequestHandler())
 sb.add_request_handler(GptQueryIntentHandler())
 sb.add_request_handler(HelpIntentHandler())
