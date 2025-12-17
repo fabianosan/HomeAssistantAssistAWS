@@ -10,7 +10,8 @@ alexa_speak_exit=Bis bald!;Tschüss;Falls Sie mich benötigen, stehe ich Ihnen z
 alexa_speak_error=Entschuldigung, ich konnte Ihre Anfrage nicht verarbeiten.
 alexa_speak_timeout=Home Assistant hat zu lange gebraucht, um zu antworten. Bitte vereinfachen Sie den Befehl und versuchen Sie es erneut!
 alexa_speak_open_dashboard=Home Assistant wird geöffnet
-alexa_speak_processing=<audio src='soundbank://soundlibrary/ui/gameshow/amzn_ui_sfx_gameshow_neutral_response_01'/>
+alexa_speak_processing="<speak>Einen Moment bitte, ich bin dran.</speak>"
 
 keywords_to_open_dashboard=öffne Dashboard; öffne Home Assistant
+
 keywords_to_close_skill=nein;nichts;das wars;danke
