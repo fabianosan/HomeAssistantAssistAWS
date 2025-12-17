@@ -164,11 +164,11 @@ def send_acknowledgment_sound(handler_input, request):
     Returns:
         bool: True if sound was sent successfully, False otherwise
     """
-    if not request or not request.request_id:
+    if not request.request_id:
         logger.warning("Cannot send acknowledgment sound: missing request_id")
         return False
         
-    processing_msg = globals().get("alexa_speak_processing", "")
+    processing_msg = globals().get("alexa_speak_processing")
     if not processing_msg:
         logger.warning("Cannot send acknowledgment sound: missing alexa_speak_processing")
         return False
