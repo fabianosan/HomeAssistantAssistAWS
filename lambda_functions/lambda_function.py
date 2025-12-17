@@ -16,9 +16,13 @@ import requests
 import requests.exceptions
 import ask_sdk_core.utils as ask_utils
 
-from ask_sdk_core.skill_builder import SkillBuilder
+from ask_sdk_core.skill_builder import CustomSkillBuilder
+from ask_sdk_core.api_client import DefaultApiClient
 from ask_sdk_core.dispatch_components import AbstractRequestHandler, AbstractExceptionHandler
 from ask_sdk_model.interfaces.alexa.presentation.apl import RenderDocumentDirective, ExecuteCommandsDirective, OpenUrlCommand
+from ask_sdk_model.services.directive import (
+    SendDirectiveRequest, Header, SpeakDirective
+)
 from datetime import datetime, timezone, timedelta
 from concurrent.futures import ThreadPoolExecutor
 
@@ -187,11 +191,23 @@ class GptQueryIntentHandler(AbstractRequestHandler):
         if home_assistant_room_recognition == "true":
             device_id = f". device_id: {context.system.device.device_id}"
 
-        # Play acknowledgment sound if enabled
+        # Send acknowledgment sound if enabled (using progressive response)
         if enable_acknowledgment_sound == "true":
             processing_msg = globals().get("alexa_speak_processing", "")
             if processing_msg:
-                response_builder.speak(processing_msg).set_should_end_session(False)
+                try:
+                    # Send progressive response with acknowledgment sound
+                    directive_header = Header(request_id=request.request_id)
+                    speak_directive = SpeakDirective(speech=processing_msg)
+                    directive_request = SendDirectiveRequest(
+                        header=directive_header, directive=speak_directive
+                    )
+                    
+                    directive_service_client = handler_input.service_client_factory.get_directive_service()
+                    directive_service_client.enqueue(directive_request)
+                    logger.debug("Acknowledgment sound sent via progressive response")
+                except Exception as e:
+                    logger.warning(f"Failed to send acknowledgment sound: {e}")
 
         # Run async call
         full_query = query + device_id
@@ -465,7 +481,7 @@ class CatchAllExceptionHandler(AbstractExceptionHandler):
         speak_output = globals().get("alexa_speak_error")
         return handler_input.response_builder.speak(speak_output).ask(speak_output).response
 
-sb = SkillBuilder()
+sb = CustomSkillBuilder(api_client=DefaultApiClient())
 sb.add_request_handler(LaunchRequestHandler())
 sb.add_request_handler(GptQueryIntentHandler())
 sb.add_request_handler(HelpIntentHandler())
