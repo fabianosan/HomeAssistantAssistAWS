@@ -151,6 +151,44 @@ class LaunchRequestHandler(AbstractRequestHandler):
         else:
             return handler_input.response_builder.speak(speak_output).ask(speak_output).response
 
+# Helper function to send progressive response with acknowledgment sound
+def send_acknowledgment_sound(handler_input, request):
+    """
+    Sends a progressive response with an acknowledgment sound to inform the user
+    that their request is being processed.
+    
+    Args:
+        handler_input: The handler input from Alexa
+        request: The request object containing request_id
+        
+    Returns:
+        bool: True if sound was sent successfully, False otherwise
+    """
+    if not request or not request.request_id:
+        logger.warning("Cannot send acknowledgment sound: missing request_id")
+        return False
+        
+    processing_msg = globals().get("alexa_speak_processing", "")
+    if not processing_msg:
+        logger.warning("Cannot send acknowledgment sound: missing alexa_speak_processing")
+        return False
+    
+    try:
+        # Send progressive response with acknowledgment sound
+        directive_header = Header(request_id=request.request_id)
+        speak_directive = SpeakDirective(speech=processing_msg)
+        directive_request = SendDirectiveRequest(
+            header=directive_header, directive=speak_directive
+        )
+        
+        directive_service_client = handler_input.service_client_factory.get_directive_service()
+        directive_service_client.enqueue(directive_request)
+        logger.debug("Acknowledgment sound sent via progressive response")
+        return True
+    except Exception as e:
+        logger.warning(f"Failed to send acknowledgment sound: {e}")
+        return False
+
 # Execute the asynchronous part with asyncio
 def run_async_in_executor(func, *args):
     loop = asyncio.new_event_loop()
@@ -193,21 +231,7 @@ class GptQueryIntentHandler(AbstractRequestHandler):
 
         # Send acknowledgment sound if enabled (using progressive response)
         if enable_acknowledgment_sound == "true":
-            processing_msg = globals().get("alexa_speak_processing", "")
-            if processing_msg:
-                try:
-                    # Send progressive response with acknowledgment sound
-                    directive_header = Header(request_id=request.request_id)
-                    speak_directive = SpeakDirective(speech=processing_msg)
-                    directive_request = SendDirectiveRequest(
-                        header=directive_header, directive=speak_directive
-                    )
-                    
-                    directive_service_client = handler_input.service_client_factory.get_directive_service()
-                    directive_service_client.enqueue(directive_request)
-                    logger.debug("Acknowledgment sound sent via progressive response")
-                except Exception as e:
-                    logger.warning(f"Failed to send acknowledgment sound: {e}")
+            send_acknowledgment_sound(handler_input, request)
 
         # Run async call
         full_query = query + device_id
