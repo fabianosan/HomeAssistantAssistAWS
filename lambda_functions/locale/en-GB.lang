@@ -10,7 +10,8 @@ alexa_speak_exit=See you later!;Bye;If you need me, I'm here;Ok, I'm off;Cheers;
 alexa_speak_error=Sorry, I couldn't process your request.
 alexa_speak_timeout=Home Assistant took too long to respond. Simplify the command and try again!
 alexa_speak_open_dashboard=Opening Home Assistant
-alexa_speak_processing=<audio src='soundbank://soundlibrary/ui/gameshow/amzn_ui_sfx_gameshow_neutral_response_01'/>
+alexa_speak_processing="<speak>One moment please.</speak>"
 
 keywords_to_open_dashboard=open dashboard; open home assistant
+
 keywords_to_close_skill=no;nothing;just that;thanks
