@@ -63,6 +63,7 @@ home_assistant_room_recognition = str(os.environ.get('home_assistant_room_recogn
 home_assistant_kioskmode = str(os.environ.get('home_assistant_kioskmode', 'False')).lower()
 ask_for_further_commands = str(os.environ.get('ask_for_further_commands', 'False')).lower()
 suppress_greeting = str(os.environ.get('suppress_greeting', 'False')).lower()
+enable_acknowledgment_sound = str(os.environ.get('enable_acknowledgment_sound', 'False')).lower()
 
 # Helper: fetch text input via webhook
 def fetch_prompt_from_ha():
@@ -186,9 +187,11 @@ class GptQueryIntentHandler(AbstractRequestHandler):
         if home_assistant_room_recognition == "true":
             device_id = f". device_id: {context.system.device.device_id}"
 
-        # Say processing message while async task runs
-        processing_msg = globals().get("alexa_speak_processing")
-        response_builder.speak(processing_msg).set_should_end_session(False)
+        # Play acknowledgment sound if enabled
+        if enable_acknowledgment_sound == "true":
+            processing_msg = globals().get("alexa_speak_processing", "")
+            if processing_msg:
+                response_builder.speak(processing_msg).set_should_end_session(False)
 
         # Run async call
         full_query = query + device_id
