@@ -10,6 +10,8 @@ alexa_speak_exit=До встречи!; Пока; Если я понадоблю�
 alexa_speak_error=Извините, я не смог обработать ваш запрос.
 alexa_speak_timeout=Home Assistant слишком долго отвечает. Упростите команду и попробуйте снова!
 alexa_speak_open_dashboard=Открываю Home Assistant
+alexa_speak_processing=<speak>Минуту пожалуйста</speak>
 
 keywords_to_open_dashboard=открыть панель; открыть Home Assistant
+
 keywords_to_close_skill=нет; ничего; всё; спасибо

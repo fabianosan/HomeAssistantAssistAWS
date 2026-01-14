@@ -10,6 +10,8 @@ alexa_speak_exit=À bientôt !;Au revoir;Si vous avez besoin de moi, je suis là
 alexa_speak_error=Désolé, je n'ai pas pu traiter votre demande.
 alexa_speak_timeout=Home Assistant a mis trop de temps à répondre. Simplifiez la commande et réessayez !
 alexa_speak_open_dashboard=Ouvrir le Home Assistant
+alexa_speak_processing=<speak>Un instant s'il vous plaît</speak>
 
 keywords_to_open_dashboard=ouvrir le panneau; ouvrir home assistant
+
 keywords_to_close_skill=non;rien;c'est tout;merci

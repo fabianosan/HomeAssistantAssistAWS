@@ -10,6 +10,8 @@ alexa_speak_exit=Ate logo!;Tchau;Se precisar estou por aqui;Ok, tô indo nessa;V
 alexa_speak_error=Desculpe, não consegui processar sua solicitação.
 alexa_speak_timeout=O Home Assistant demorou muito para responder. Simplifique o comando e tente novamente!
 alexa_speak_open_dashboard=Abrindo o Home Assistant
+alexa_speak_processing=<speak>Um momento por favor</speak>
 
 keywords_to_open_dashboard=abrir painel; abrir home assistant
+
 keywords_to_close_skill=não;nada;só isso;obrigado

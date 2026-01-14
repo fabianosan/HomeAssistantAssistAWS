@@ -10,6 +10,8 @@ alexa_speak_exit=Do zobaczenia!;Pa;Pozostaję do usług!;Ok, wyłączam się;Dzi
 alexa_speak_error=Przepraszam, nie potrafię spełnić twojego żądania.
 alexa_speak_timeout=Home Assistant potrzebował zbyt dużo czasu na odpowiedź. Uprość swoją komendę i spróbuj ponownie.
 alexa_speak_open_dashboard=Otwieram Home Assistant
+alexa_speak_processing=<speak>Proszę chwilę zaczekać</speak>
 
 keywords_to_open_dashboard=otwórz dashboard; otwórz home assistant
+
 keywords_to_close_skill=to wszystko;nic więcej;wystarczy;dzięki;dziękuję

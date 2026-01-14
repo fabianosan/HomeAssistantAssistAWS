@@ -90,10 +90,10 @@ Agora você precisa criar uma função Lambda.
   - (opcional) Chave = **home_assistant_room_recognition**: Ative o modo de identificação de área do dispositivo com `True`. **Atenção**, só funciona com IA, se utilizar o Assist padrão, desative essa opção, pois nenhum comando não irá funcionar (isso inclui a nova funcionalidade `Assist fallback` do HA 2024.12 que também não irá funcionar).
   - (opcional) Chave = **home_assistant_dashboard**, Valor = O ID do seu painel. Exemplo: `mushroom`. _(O padrão é 'lovelace') _
   - (opcional) Chave = **home_assistant_kioskmode**, Valor = `True`. Defina esta variável para habilitar o KIOSKMODE. _(Certifique-se de que você tenha este componente instalado, configurado e funcionando em sua instância do Home Assistant)._
-  - (opcional) Chave = **ask_for_further_commands**, Valor = `True`. Esta variável determina se a Alexa perguntará por mais comandos após responder. Defina como `True` para ativar este comportamento ou `False` para desativá-lo. O padrão é `False`.
   - (opcional) Chave = **assist_input_entity**: Valor = `input_text.assistant_input`. Ative a funcionalidade de iniciar uma conversa com prompt do Home Assistant. **Atenção**, essa funcionalidade requer [configurações extras no Home Assistant](#ativando-iniciador-de-conversa-com-prompt-do-home-assistant).
   - (opcional) Chave = **ask_for_further_commands**, Valor = `True` ou `False`. Esta variável determina se a Alexa perguntará por mais comandos após responder. Defina como `True` para ativar este comportamento ou `False` para desativá-lo. O padrão é `False`.
   - (opcional) Chave = **suppress_greeting**, Valor = `True` ou `False`. Esta variável determina se a Alexa irá falar a saudação/pergunta inicial ao abrir a skill. Defina como `True` para desabilitar a saudação ou `False` para mantê-la. O padrão é `False`.
+  - (opcional) Chave = **enable_acknowledgment_sound**, Valor = `True` ou `False`. Esta variável determina se a Alexa emitirá uma confirmação imediata quando sua solicitação for recebida e começar a ser processada. Isso é útil para respostas lentas de LLM, pois informa ao usuário que sua solicitação já está em tratamento. Defina como True para habilitar a confirmação ou False para desativá-la. O padrão é False.
   - (opcional) Chave = **debug**, Valor = `True`. Defina esta variável para registrar as mensagens de depuração e permitir a variável de ambiente `home_assistant_token`.
   - (opcional, _não recomendado_) Chave = **home_assistant_token**, Valor = Seu Home Assistant Long-Lived Access Token. Você conectará sua skill Alexa à sua conta de usuário do Home Assistant nos próximos passos, então não precisará adicioná-lo aqui. No entanto, você pode adicioná-lo aqui para fins de depuração. _(Você deve remover e excluir essa variável de ambiente depois que a depuração terminar)_.
 - Clique no botão **Save** no canto inferior direito.
@@ -345,3 +345,4 @@ Apesar do aviso de isenção de responsabilidade da documentação da Alexa, os 
 ## Localização da Alexa
 A localização deve corresponder ao local e idioma usados em seus dispositivos Amazon Echo.
 _Os locais suportados pela skill atualmente estão descritos na página principal._
+

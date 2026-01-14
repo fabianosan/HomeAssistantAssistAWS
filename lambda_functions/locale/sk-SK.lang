@@ -10,6 +10,7 @@ alexa_speak_exit=Majte sa!;Zbohom;Ak ma budete potrebovať, som tu;Dobre, odchá
 alexa_speak_error=Prepáčte, požiadavku sa nepodarilo spracovať.
 alexa_speak_timeout=Home Assistant odpovedal príliš dlho. Zjednodušte príkaz a skúste to znova!
 alexa_speak_open_dashboard=Otváram Home Assistant
+alexa_speak_processing=<speak>Prosím, chvíľku počkajte</speak>
 
 keywords_to_open_dashboard=otvor panel; otvor home assistant
 keywords_to_close_skill=nie;nič;to je všetko;ďakujem

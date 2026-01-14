@@ -90,10 +90,10 @@ Next, you need to create a Lambda function.
   - (optional) Key = **home_assistant_room_recognition**: Enable the device area recognition mode with `True`. **Attention**, it only works with AI. If using the default Assist, disable this option, as no commands will work (this includes the new `Assist fallback` feature introduced in HA 2024.12 that will no longger work too).
   - (optional) Key = **home_assistant_dashboard**, Value = Your dashboard path name. Example: `mushroom`. _(The default is `lovelace`)_
   - (optional) Key = **home_assistant_kioskmode**, Value = `True`. Set this variable to enable KIOSKMODE. _(Make sure you have this component installed, up, and running in your Home Assistant instance)._
-  - (optional) Key = **ask_for_further_commands**, Value = `True`. This variable determines whether Alexa will ask for further commands after responding. Set it to `True` to enable this behavior or `False` to disable it. The default is `False`.
   - (optional) Key = **assist_input_entity**: Value = `input_text.assistant_input`. Enable conversation starter with prompt from Home Assistant. **Attention**, this feature require [extra setup in Home Assistant](#enabling-conversation-starter-with-prompt-from-home-assistant).
   - (optional) Key = **ask_for_further_commands**, Value = `True` or `False`. This variable determines whether Alexa will ask for further commands after responding. Set it to `True` to enable this behavior or `False` to disable it. The default is `False`.
   - (optional) Key = **suppress_greeting**, Value = `True` or `False`. This variable determines whether Alexa will speak the initial greeting/question when the skill is opened. Set it to `True` to disable the greeting or `False` to keep it. The default is `False`.
+  - (optional) Key = **enable_acknowledgment_sound**, Value = `True` or `False`. This variable determines whether Alexa respond an acknowledgment when your request is received and being processed. This is useful for slow LLM responses so the user knows their request is being handled. Set it to `True` to enable the sound or `False` to disable it. The default is `False`.
   - (optional) Key = **debug**, Value = `True`. Set this variable to log the debug messages and allow the `home_assistant_token` environment variable.
   - (optional, _not recommended_) Key = **home_assistant_token**, Value = Your Home Assistant Long-Lived Access Token. You will connect your Alexa Skill with your Home Assistant user account in the later steps, meaning you don’t need to add it here. However, you can add it here for debugging purposes. _(You should remove and delete this environment variable after debugging is finished)_.
 - Click the **Save** button in the bottom right-hand corner.
@@ -345,3 +345,4 @@ Despite the Alexa documentation’s disclaimer, however, `Let’s Encrypt` certi
 ## Alexa Locale
 The locale should match the location and language used for your Amazon Echo devices.
 _The current supported skill locales are described in main page page._
+
