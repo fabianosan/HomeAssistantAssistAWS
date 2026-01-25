@@ -1,6 +1,6 @@
 # Home Assistant Assist Alexa Skill (AWS Hosted)
 
-Alexa Skill that integrates Home Assistant Assist or your preferred Generative AI.
+Alexa Skill that integrates Home Assistant Assist or your preferred Generative AI via the conversation API and also allows you to open your favorite dashboard on Echo Show.
 
 ---
 
@@ -82,7 +82,7 @@ Note: If your language is not supported, please open an `issue` attaching your o
 
 # Home Assistant Assist Alexa Skill (AWS Hosted)
 
-Skill Alexa que integra o Home Assistant Assist ou sua IA Generativa preferida.
+Skill Alexa que integra o Home Assistant Assist ou sua IA Generativa preferida via a API de conversação e também permite abrir seu painel favorito no Echo Show
 
 ---
 
@@ -151,3 +151,4 @@ A skill tem suporte para os seguintes idiomas:
 - Português (Portugal)
 - Russo (Rússia)
 - Eslovaco (Eslováquia)
+
