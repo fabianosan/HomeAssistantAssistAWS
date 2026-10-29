@@ -411,14 +411,16 @@ def replace_words(query):
 # Replaces words and special characters to improve API response speech
 def improve_response(speech):
     global user_locale
-    speech = speech.replace(':\n\n', '').replace('\n\n', '. ').replace('\n', ',').replace('-', '').replace('_', ' ')
+    speech = speech.replace(':\n\n', '').replace('\n\n', '. ').replace('\n', ',').replace('_', ' ')
+    # Keep a minus sign ("-2°"); any other hyphen/dash (bullets, "well-known") becomes a space
+    speech = re.sub(r'(?<![\w])-(?=\d)', '\x00', speech).replace('-', ' ').replace('\x00', '-')
 
     # Change decimal separator if user_locale = "de-DE"
     if user_locale == "DE":
         # Only replace decimal separators and not 1.000 separators
         speech = re.sub(r'(\d+)\.(\d{1,3})(?!\d)', r'\1,\2', speech)  # Decimal point (e.g. 2.4 -> 2,4)
     
-    speech = re.sub(r'[^A-Za-z0-9çÇáàâãäéèêíïóôõöúüñÁÀÂÃÄÉÈÊÍÏÓÔÕÖÚÜÑ\sß.,!?°]', '', speech)
+    speech = re.sub(r'[^A-Za-z0-9çÇáàâãäéèêíïóôõöúüñÁÀÂÃÄÉÈÊÍÏÓÔÕÖÚÜÑ\sß.,!?°:%£\-]', '', speech)  # ':' keeps 11:41 a time, not a number
     return speech
 
 # Loads the initial APL screen template
